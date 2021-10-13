@@ -1,0 +1,37 @@
+#!/bin/bash
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_2_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_2_Probe_D8_T1_positions.csv
+   
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_3_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_3_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_4_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_4_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_5_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_5_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_6_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_6_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_7_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_7_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_8_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_8_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_9_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_9_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_10_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_10_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_2_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_2_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_3_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_3_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_4_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_4_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_5_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_5_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_6_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_6_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_7_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_7_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_8_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_8_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_9_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_9_Probe_D8_T1_positions.csv
+
+cp /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/061019_10_Probe_D8_T1_positions.csv /Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Probes/191006_10_Probe_D8_T1_positions.csv

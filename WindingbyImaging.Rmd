@@ -1,0 +1,2156 @@
+---
+title: "winding_by_fa"
+author: "alexandra badea"
+date: "10/4/2021"
+output: pdf_document
+toc: true
+---
+
+# Aim
+
+We examine whether APOE2, APOE3, and APOE4 carriers use a hippocampal or caudate based spatial navigation strategy. 
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE)
+library(tidyverse)
+library(cowplot)
+library(scales)
+# installing packages 
+library(tidyverse)
+library(cowplot)
+library(gplots)
+library(ggplot2)
+library(patternplot)
+library(lme4)
+library(visreg)
+library(tidyr)
+library(magrittr) 
+library(dplyr)
+library(ggpubr)
+library(lme4)
+library(lsmeans)
+library(emmeans)
+library(multcomp)
+library(zoo)
+#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE, message=FALSE)
+outpath<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
+
+data <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_FA <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_VOL <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_VOL.csv")
+
+data_DEG<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_DEG.csv")
+
+data_CLUS<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_CLUS.csv")
+
+data <- data %>% 
+   filter(Genotype != "HN") 
+
+data_FA <- data_FA %>% 
+   filter(Genotype != "HN") 
+
+data_VOL <- data_VOL %>% 
+   filter(Genotype != "HN") 
+
+data_VOL[,15:347]=data_VOL[,15:347]/data_VOL[,348]
+
+data_DEG <- data_DEG %>% 
+   filter(Genotype != "HN") 
+
+data_CLUS <- data_CLUS %>% 
+   filter(Genotype != "HN") 
+
+
+
+# separating by sex
+geno_combined_FA <- data_FA
+combo_f_FA <- geno_combined_FA %>% 
+  filter(Sex == "female")
+combo_m_FA <- geno_combined_FA %>% 
+  filter(Sex == "male")
+
+geno_combined<-geno_combined_FA #temporary fix
+combo_f<-combo_f_FA
+combo_m<-combo_m_FA
+
+geno_combined_VOL <- data_VOL
+combo_f_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "female")
+combo_m_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "male")
+
+geno_combined_DEG <- data_DEG
+combo_f_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "female")
+combo_m_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "male")
+
+geno_combined_CLUS <- data_CLUS
+combo_f_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "female")
+combo_m_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "male")
+
+#data[,15:347]=data[,15:347]/data[,348]
+  
+# ad <- data %>% 
+#   filter(! is.na(Weight)) %>% 
+#   mutate(sex = case_when(
+#     sex == "F" ~ "Female",
+#     sex == "M" ~ "Male"
+#   )) %>% 
+#   filter(risk_for_ad != 3)
+# 
+# # data by genotypes
+# e23 <- ad %>% 
+#   filter(genotype == "APOE23") 
+# e33 <- ad %>% 
+#   filter(genotype == "APOE33")
+# e34 <- ad %>% 
+#   filter(genotype == "APOE34")
+# 
+# # combining genotypes 
+# geno_combined <- ad %>% 
+#   mutate(Genotype = case_when(
+#     genotype == "APOE23" | genotype == "APOE33" ~ "APOE3",
+#     genotype == "APOE34" | genotype == "APOE44" ~ "APOE4"
+#   )) 
+
+#<!-- model<-emmeans(lm, "Sex", adjust = "Tukey") -->
+#<!-- pairs(model) -->
+#<!-- summary(lm) -->
+#<!-- confint(lm) -->
+
+
+#model<-emmeans(CPu.lm, "Sex", adjust = "Tukey")
+#pairs(model)
+#summary(lm)
+#confint(lm)
+
+```
+ 
+
+# FA
+
+# Day 5 Probe By Hc FA
+
+``` {r HcFAybDay5Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = Hc, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc FA", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_FA, aes(Hc, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  #scale_color_colors(palette = c('blueviolet', 'chartreuse1', 'red'))+
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "Hc FA", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+#------
+# #https://stackoverflow.com/questions/65554255/error-while-plotting-with-ggsave-and-other-save-functions
+# animal_plots <- foreach(current_animal = c("Dog", "Cats", "Turtle")) %do% {
+#     plot_likert(
+#       t(graph_data %>% filter(animal == current_animal)),
+#       title = "Female",
+#       legend.labels = c("strongly disagree","disagree", "neither nor", "agree", "strongly agree"),
+#       grid.range = c(1.6, 1.1),
+#       expand.grid = FALSE,
+#       axis.labels = c(" "),
+#       values = "sum.outside",
+#       show.prc.sign = TRUE,
+#       catcount = 4,
+#       cat.neutral = 3
+#     )
+#   }
+#   
+#   theplot <- ggarrange(plot1, animal_plots[[1]],
+#                        animal_plots[[2]], animal_plots[[3]], 
+#                        labels = NULL,
+#                        common.legend = TRUE,
+#                        legend = "bottom",
+#                        ncol = 1, nrow = 4)
+#   
+#   ggsave(filename=paste(q_column_name, ".png",sep=""), plot=theplot, device = "png")
+#   #-----
+
+
+
+ggsave(paste(outpath,'Probe5ByHcFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+  
+
+
+lm <- lm(Probe_d5 ~ Hc*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Hc*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Hc*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By CPu FA
+
+``` {r CPu:FA Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = CPu, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu FA", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_FA, aes(CPu, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "CPu FA", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByCPuFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+lm <- lm(Probe_d5 ~ CPu*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ CPu*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ CPu*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+
+# Day 5 Probe By fi FA
+
+``` {r fi:FA Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = fi, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "fi FA", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_FA, aes(fi, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "fi FA", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+ggsave(paste(outpath,'Probe5ByfiFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ fi*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ fi*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fi*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By ic FA
+
+``` {r ic_FA_by_ Day5Probe}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = ic, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_FA, aes(ic, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByicFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ ic*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ ic*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ ic*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 5 Probe By cbw FA
+
+``` {r icbw_FA_by_Day5Probe}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = cbw, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_FA, aes(cbw, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probed5_cbwFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ cbw*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ cbw*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ cbw*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+
+
+
+ 
+
+
+
+# Day 8 Probe By Hc FA
+
+``` {r HcFAybDay8Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc FA", y = "WN: Probe Day 8") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_FA, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       x = "Hc FA", y = "WN: Probe Day 8") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByHcFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+# Day 8 Probe By CPu FA
+
+
+``` {r CPu:FA Day 8 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = CPu, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu FA", y = "WN: Probe Day 8") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_FA, aes(CPu, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       x = "CPu FA", y = "WN: Probe Day 8") +
+  theme(legend.position="none")
+
+
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByCPuFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d8 ~ CPu*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ CPu*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ CPu*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+
+# Day 8 Probe By fi FA
+
+``` {r fi:FA Day 8 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = fi, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       subtitle = "Both males and females",
+       x = "fi FA", y = "WN: Probe Day 8") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_FA, aes(fi, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       x = "fi FA", y = "WN: Probe Day 8") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByfiFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ fi*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ fi*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ fi*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 8 Probe By ic FA
+
+``` {r ic_FA_by_ Day8Probe}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = ic, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_FA, aes(ic, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+
+ggsave(paste(outpath,'Probe8ByicFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ ic*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ ic*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ ic*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By cbw FA
+
+
+``` {r icbw_FA_by_Day8Probe}
+
+plot1 <- ggplot(geno_combined_FA, aes(x = cbw, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_FA, aes(cbw, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8BycbwFA.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d8 ~ cbw*Genotype*Sex, geno_combined_FA)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ cbw*Genotype, combo_f_FA)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ cbw*Genotype, combo_m_FA)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+
+
+
+
+
+
+# Degree of Connectivity
+
+# Day 5 Probe By Hc DEG
+
+``` {r HcDEGybDay5Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = Hc, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc DEG", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_DEG, aes(Hc, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "Hc DEG", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByHcDAEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d5 ~ Hc*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Hc*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Hc*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By CPu DEG
+
+``` {r CPu:DEG Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = CPu, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu DEG", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_DEG, aes(CPu, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "CPu DEG", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByCPuDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d5 ~ CPu*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ CPu*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ CPu*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+
+# Day 5 Probe By fi DEG
+
+``` {r fi:DEG Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = fi, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "fi DEG", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_DEG, aes(fi, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "fi DEG", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+
+ggsave(paste(outpath,'Probe5ByfiDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ fi*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ fi*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fi*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By ic DEG
+
+``` {r ic_DEG_by_ Day5Probe}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = ic, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_DEG, aes(ic, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+
+ggsave(paste(outpath,'Probe5ByicDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d5 ~ ic*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ ic*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ ic*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+# Day 5 Probe By cbw DEG
+
+``` {r cbw_DEGbyDay5Probe}
+plot1 <- ggplot(geno_combined_DEG, aes(x = cbw, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_DEG, aes(cbw, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5BycbwDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ cbw*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ cbw*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ cbw*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By Hc DEG
+
+``` {r HcDEGybDay8Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc DEG", y = "WN: Probe Day 8") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_DEG, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       x = "Hc DEG", y = "WN: Probe Day 8") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByHCDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 8 Probe By CPu DEG
+
+``` {r CPu:DEG Day8 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = CPu, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu DEG", y = "WN: Probe Day 8") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_DEG, aes(CPu, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 8,  linear model",
+       x = "CPu DEG", y = "WN: Probe Day 8") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByCPuDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d8 ~ CPu*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ CPu*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ CPu*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+# Day 8 Probe By fi DEG
+
+``` {r fi:DEG Day 8 Probe}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = fi, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_DEG, aes(fi, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByfiDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ fi*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ fi*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ fi*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By ic DEG
+
+``` {r ic :DEG Day 8 Probe}
+
+plot1 <- ggplot(geno_combined_DEG, aes(x = ic, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_DEG, aes(ic, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe8ByicDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ ic*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ ic*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ ic*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+# Day 8 Probe By cbw DEG
+
+``` {r cbw_DEG_Day8Probe}
+plot1 <- ggplot(geno_combined_DEG, aes(x = cbw, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_DEG, aes(cbw, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5BycbwDEG.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d8 ~ cbw*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ cbw*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ cbw*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+
+
+
+# Clustering Coefficient
+
+# Day 5 Probe By Hc CLUS
+
+``` {r HcCLUSybDay5Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = Hc, y = Probe_d5,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc CLUS", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_CLUS, aes(Hc, Probe_d5, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "Hc CLUS", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByHc_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ Hc*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Hc*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Hc*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By CPu CLUS
+
+``` {r CPu:CLUS Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = CPu, y = Probe_d5,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu CLUS", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_CLUS, aes(CPu, Probe_d5, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "CPu CLUS", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByCPu_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d5 ~ CPu*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ CPu*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ CPu*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+
+# Day 5 Probe By fi CLUS
+
+``` {r fi:CLUS Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = fi, y = Probe_d5,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "fi CLUS", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_CLUS, aes(fi, Probe_d5, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "fi CLUS", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5Byfi_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ fi*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ fi*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fi*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By ic CLUS
+
+``` {r ic_CLUS_by_ Day5Probe}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = ic, y = Probe_d5,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_CLUS, aes(ic, Probe_d5, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5Byic_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ ic*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ ic*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ ic*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+# Day 5 Probe By cbw CLUS
+
+``` {r cbw_CLUSbyDay5Probe}
+plot1 <- ggplot(geno_combined_CLUS, aes(x = cbw, y = Probe_d5,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_CLUS, aes(cbw, Probe_d5, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+
+ggsave(paste(outpath,'Probe5Bycbw_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d5 ~ cbw*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ cbw*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ cbw*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By Hc CLUS
+
+``` {r HcCLUSybDay8Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = Hc, y = Probe_d8,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc CLUS", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_CLUS, aes(Hc, Probe_d8, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "Hc CLUS", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probed8_Hc_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 8 Probe By CPu CLUS
+
+``` {r CPu:CLUS Day8 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = CPu, y = Probe_d8,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu CLUS", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_CLUS, aes(CPu, Probe_d8, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "CPu CLUS", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probed8_CPu_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d8 ~ CPu*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ CPu*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ CPu*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+# Day 8 Probe By fi CLUS
+
+``` {r fi:CLUS Day 8 Probe}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = fi, y = Probe_d8,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_CLUS, aes(fi, Probe_d8, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probed8_fi_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ fi*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ fi*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ fi*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By ic CLUS
+
+``` {r ic :CLUS Day 8 Probe}
+
+plot1 <- ggplot(geno_combined_CLUS, aes(x = ic, y = Probe_d8,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_CLUS, aes(ic, Probe_d8, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probed8_ic_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ ic*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ ic*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ ic*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+# Day 8 Probe By cbw CLUS
+
+``` {r cbw_CLUS_Day8Probe}
+plot1 <- ggplot(geno_combined_CLUS, aes(x = cbw, y = Probe_d8,
+                                       color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_CLUS, aes(cbw, Probe_d8, 
+                                       color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probed8_cbw_CLUS.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ cbw*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ cbw*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ cbw*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+
+
+
+
+
+
+# Volume
+
+# Day 5 Probe By Hc VOL
+
+``` {r HcVOLybDay5Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = Hc, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc VOL", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_VOL, aes(Hc, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "Hc VOL", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByHc_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ Hc*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Hc*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Hc*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By CPu VOL
+
+``` {r CPu:VOL Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = CPu, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu VOL", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_VOL, aes(CPu, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "CPu VOL", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5ByCPu_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ CPu*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ CPu*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ CPu*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+
+# Day 5 Probe By fi VOL
+
+``` {r fi:VOL Day 5 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = fi, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "fi VOL", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_VOL, aes(fi, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "fi VOL", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5Byfi_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ fi*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ fi*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fi*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 5 Probe By ic VOL
+
+``` {r ic_VOL_by_ Day5Probe}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = ic, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_VOL, aes(ic, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe5Byic_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+lm <- lm(Probe_d5 ~ ic*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ ic*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ ic*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+# Day 5 Probe By cbw VOL
+
+``` {r cbw_VOLbyDay5Probe}
+plot1 <- ggplot(geno_combined_VOL, aes(x = cbw, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_VOL, aes(cbw, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ cbw*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ cbw*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ cbw*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By Hc VOL
+
+``` {r HcVOLybDay8Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "Hc VOL", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_VOL, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "Hc VOL", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+
+ggsave(paste(outpath,'Probe85ByHC_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+# Day 8 Probe By CPu VOL
+
+``` {r CPu:VOL Day8 Probe, echo = FALSE}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = CPu, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       subtitle = "Both males and females",
+       x = "CPu VOL", y = "WN: Probe Day 5") +
+  theme_bw() +
+  background_grid(major = "xy", minor = "none") 
+
+plot2 <- ggplot(geno_combined_VOL, aes(CPu, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5,  linear model",
+       x = "CPu VOL", y = "WN: Probe Day 5") +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot2, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe85ByHC_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ CPu*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ CPu*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ CPu*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+
+#lm1<-lm(NormSWDist ~ Sex + factor(APOE), probe_trials)
+#model<-emmeans(lm1, "Sex", adjust = "Tukey")
+#pairs(model)
+
+```
+
+
+# Day 8 Probe By fi VOL
+
+``` {r fi:VOL Day 8 Probe}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = fi, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_VOL, aes(fi, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe85Byfi_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ fi*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ fi*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ fi*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+
+# Day 8 Probe By ic VOL
+
+``` {r ic :VOL Day 8 Probe}
+
+plot1 <- ggplot(geno_combined_VOL, aes(x = ic, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_VOL, aes(ic, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe85Byic_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ ic*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ ic*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ ic*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
+# Day 8 Probe By cbw VOL
+
+``` {r cbw_VOL_Day8Probe}
+plot1 <- ggplot(geno_combined_VOL, aes(x = cbw, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined_VOL, aes(cbw, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+ggsave(paste(outpath,'Probe85Bycbw_VOL.pdf',sep=''), plot = last_plot(), width=5,height=5,units=c("in"), dpi=200, device = "pdf")
+
+
+lm <- lm(Probe_d8 ~ cbw*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm_f <- lm(Probe_d8 ~ cbw*Genotype, combo_f_VOL)
+summary(lm_f)
+lm_m <- lm(Probe_d8 ~ cbw*Genotype, combo_m_VOL)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+anova(lm_f)
+#males
+anova(lm_m)
+
+```
