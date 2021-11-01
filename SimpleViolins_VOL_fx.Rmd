@@ -107,12 +107,12 @@ dodge <- position_dodge(width = 1)
 ```
 
 
-# Plots for Hc
+# Plots for fx
 
 We embed plots for day d8 probe trials:
 
-```{r Hc plots, echo=FALSE, warning=FALSE}
-plot1VOL<-ggplot(data_VOL, aes(Sex, Hc, fill = Sex)) +
+```{r fx plots, echo=FALSE, warning=FALSE}
+plot1VOL<-ggplot(data_VOL, aes(Sex, fx, fill = Sex)) +
   geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
   facet_grid(. ~ Genotype)  +
   geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
@@ -129,7 +129,7 @@ plot1VOL<-ggplot(data_VOL, aes(Sex, Hc, fill = Sex)) +
   theme_bw() 
  
 
-plot1FA<-ggplot(data_FA, aes(Sex, Hc, fill = Sex)) +
+plot1FA<-ggplot(data_FA, aes(Sex, fx, fill = Sex)) +
   geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
   facet_grid(. ~ Genotype)  +
   geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
@@ -145,7 +145,7 @@ plot1FA<-ggplot(data_FA, aes(Sex, Hc, fill = Sex)) +
   theme(legend.position="bottom")+
   theme_bw() 
 
-plot1DEG<-ggplot(data_DEG, aes(Sex, Hc, fill = Sex)) +
+plot1DEG<-ggplot(data_DEG, aes(Sex, fx, fill = Sex)) +
   geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
   facet_grid(. ~ Genotype)  +
   geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
@@ -161,7 +161,7 @@ plot1DEG<-ggplot(data_DEG, aes(Sex, Hc, fill = Sex)) +
   theme(legend.position="bottom")+
   theme_bw()
 
-plot1CLUS<-ggplot(data_CLUS, aes(Sex, Hc, fill = Sex)) +
+plot1CLUS<-ggplot(data_CLUS, aes(Sex, fx, fill = Sex)) +
   geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
   facet_grid(. ~ Genotype)  +
   geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
@@ -182,243 +182,243 @@ plot<-ggarrange(plot1VOL, plot1FA, plot1DEG, plot1CLUS,
          # labels = c("Volume", "FA", "DEG", "CLUS" ),
           ncol = 4, nrow = 1, common.legend = TRUE, legend="bottom")
 
-annotate_figure(plot, top = text_grob("Hc", 
+annotate_figure(plot, top = text_grob("fx", 
                color = "black", face = "bold", size = 14))
 
-ggsave(paste(outpath,'Hc_4metrics_shortset.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+ggsave(paste(outpath,'fx_4metrics_shortset.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
 
 
 ```
 
-```{r Hc_VOL_stats, echo='FALSE'}
+```{r fx_VOL_stats, echo='FALSE'}
 
 
-print('Hc') 
+print('fx') 
 
-lm_Hc_VOL <- lm(Hc ~ Genotype*Sex, geno_combined_VOL)
-summary(lm_Hc_VOL)
-lm_Hc_VOL_f <- lm(Hc ~ Genotype, combo_f_FA)
-#summary(lm_Hc_VOL_f)
-lm_Hc_VOL_m <- lm(Hc ~ Genotype, combo_m_FA)
-#summary(lm_Hc_VOL_f)
+lm_fx_VOL <- lm(fx ~ Genotype*Sex, geno_combined_VOL)
+summary(lm_fx_VOL)
+lm_fx_VOL_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_VOL_f)
+lm_fx_VOL_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_VOL_f)
 
 
 #omnibus testing
 #https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
 
-sink(paste(outpath, "Hc_VOL_SimpleStats.txt",sep=''))
+sink(paste(outpath, "fx_VOL_SimpleStats.txt",sep=''))
 'omnibus testing'
-joint_tests(ref_grid(lm_Hc_VOL)) 
-joint_tests(ref_grid(lm_Hc_VOL), by = "Sex", adjust = "sidak") 
-joint_tests(ref_grid(lm_Hc_VOL), by = "Genotype",adjust = "sidak" ) 
+joint_tests(ref_grid(lm_fx_VOL)) 
+joint_tests(ref_grid(lm_fx_VOL), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_VOL), by = "Genotype",adjust = "sidak" ) 
 
 'anova'
-anova(lm_Hc_VOL)
-#anova(lm_Hc_VOL_f)
-#anova(lm_Hc_VOL_m)
+anova(lm_fx_VOL)
+#anova(lm_fx_VOL_f)
+#anova(lm_fx_VOL_m)
 
 #post hoc comparison
-Hc_VOL.emm <- emmeans(lm_Hc_VOL , ~ Genotype | Sex, adjust = "sidak")
-contrast(Hc_VOL.emm, simple = c("Genotype", "Sex")) #FDR
-contrast(Hc_VOL.emm, simple = list("Genotype", "Sex"))
+fx_VOL.emm <- emmeans(lm_fx_VOL , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_VOL.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_VOL.emm, simple = list("Genotype", "Sex"))
 
 #post hoc tests
-summary(glht(lm_Hc_VOL, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
-res<-summary(glht(lm_Hc_VOL, emm(pairwise ~ Genotype*Sex))) #consider save to file
-#summary(as.glht(pairs(lm_Hc_VOL.emm), by = NULL))
+summary(glht(lm_fx_VOL, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_VOL, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_VOL.emm), by = NULL))
  
-summary(glht(lm_Hc_VOL, emm(pairwise ~ Genotype | Sex)))
-summary(glht(lm_Hc_VOL, emm(pairwise ~ Sex | Genotype)))
+summary(glht(lm_fx_VOL, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_VOL, emm(pairwise ~ Sex | Genotype)))
 
-mypairs<-pairs(Hc_VOL.emm) #_consider save to file
-pairs(Hc_VOL.emm, by="Genotype")
-pairs(Hc_VOL.emm, by="Sex")
+mypairs<-pairs(fx_VOL.emm) #_consider save to file
+pairs(fx_VOL.emm, by="Genotype")
+pairs(fx_VOL.emm, by="Sex")
 
 
-print('Hc VOL')
-emmip(lm_Hc_VOL, ~ Genotype | Sex )
-emmip(lm_Hc_VOL, ~ Sex | Genotype )
-emmip(lm_Hc_VOL, Genotype~ Sex  )
+print('fx VOL')
+emmip(lm_fx_VOL, ~ Genotype | Sex )
+emmip(lm_fx_VOL, ~ Sex | Genotype )
+emmip(lm_fx_VOL, Genotype~ Sex  )
 
 sink()
 
 
 
-plot(Hc_VOL.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
-horizontal = FALSE, colors = "darkgreen", main ="Hc VOL")
-ggsave(paste(outpath,'Hc_VOL_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+plot(fx_VOL.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx VOL")
+ggsave(paste(outpath,'fx_VOL_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
 
 ```
 
-```{r Hc_FA_stats, echo='FALSE'}
+```{r fx_FA_stats, echo='FALSE'}
 'simple stats'
 
-print('Hc') 
+print('fx') 
 
-lm_Hc_FA <- lm(Hc ~ Genotype*Sex, geno_combined_FA)
-summary(lm_Hc_FA)
-lm_Hc_FA_f <- lm(Hc ~ Genotype, combo_f_FA)
-#summary(lm_Hc_FA_f)
-lm_Hc_FA_m <- lm(Hc ~ Genotype, combo_m_FA)
-#summary(lm_Hc_FA_f)
+lm_fx_FA <- lm(fx ~ Genotype*Sex, geno_combined_FA)
+summary(lm_fx_FA)
+lm_fx_FA_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_FA_f)
+lm_fx_FA_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_FA_f)
 
 
 #omnibus testing
 #https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
 
-sink(paste(outpath, "Hc_FA_SimpleStats.txt",sep=''))
+sink(paste(outpath, "fx_FA_SimpleStats.txt",sep=''))
 'omnibus testing'
-joint_tests(ref_grid(lm_Hc_FA)) 
-joint_tests(ref_grid(lm_Hc_FA), by = "Sex", adjust = "sidak") 
-joint_tests(ref_grid(lm_Hc_FA), by = "Genotype",adjust = "sidak" ) 
+joint_tests(ref_grid(lm_fx_FA)) 
+joint_tests(ref_grid(lm_fx_FA), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_FA), by = "Genotype",adjust = "sidak" ) 
 
 'anova'
-anova(lm_Hc_FA)
-#anova(lm_Hc_FA_f)
-#anova(lm_Hc_FA_m)
+anova(lm_fx_FA)
+#anova(lm_fx_FA_f)
+#anova(lm_fx_FA_m)
 
 #post hoc comparison
-Hc_FA.emm <- emmeans(lm_Hc_FA , ~ Genotype | Sex, adjust = "sidak")
-contrast(Hc_FA.emm, simple = c("Genotype", "Sex")) #FDR
-contrast(Hc_FA.emm, simple = list("Genotype", "Sex"))
+fx_FA.emm <- emmeans(lm_fx_FA , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_FA.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_FA.emm, simple = list("Genotype", "Sex"))
 
 #post hoc tests
-summary(glht(lm_Hc_FA, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
-res<-summary(glht(lm_Hc_FA, emm(pairwise ~ Genotype*Sex))) #consider save to file
-#summary(as.glht(pairs(lm_Hc_FA.emm), by = NULL))
+summary(glht(lm_fx_FA, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_FA, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_FA.emm), by = NULL))
  
-summary(glht(lm_Hc_FA, emm(pairwise ~ Genotype | Sex)))
-summary(glht(lm_Hc_FA, emm(pairwise ~ Sex | Genotype)))
+summary(glht(lm_fx_FA, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_FA, emm(pairwise ~ Sex | Genotype)))
 
-mypairs<-pairs(Hc_FA.emm) #_consider save to file
-pairs(Hc_FA.emm, by="Genotype")
-pairs(Hc_FA.emm, by="Sex")
+mypairs<-pairs(fx_FA.emm) #_consider save to file
+pairs(fx_FA.emm, by="Genotype")
+pairs(fx_FA.emm, by="Sex")
 
-print('Hc FA')
-emmip(lm_Hc_FA, ~ Genotype | Sex )
-emmip(lm_Hc_FA, ~ Sex | Genotype )
-emmip(lm_Hc_FA, Genotype~ Sex  )
+print('fx FA')
+emmip(lm_fx_FA, ~ Genotype | Sex )
+emmip(lm_fx_FA, ~ Sex | Genotype )
+emmip(lm_fx_FA, Genotype~ Sex  )
 sink()
 
-plot(Hc_FA.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
-horizontal = FALSE, colors = "darkgreen", main ="Hc FA")
-ggsave(paste(outpath,'Hc_FA_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+plot(fx_FA.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx FA")
+ggsave(paste(outpath,'fx_FA_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
 
 ```
 
-```{r Hc_DEG_stats, echo='FALSE'}
+```{r fx_DEG_stats, echo='FALSE'}
 'simple stats'
 
-print('Hc') 
+print('fx') 
 
-lm_Hc_DEG <- lm(Hc ~ Genotype*Sex, geno_combined_DEG)
-summary(lm_Hc_DEG)
-lm_Hc_DEG_f <- lm(Hc ~ Genotype, combo_f_FA)
-#summary(lm_Hc_DEG_f)
-lm_Hc_DEG_m <- lm(Hc ~ Genotype, combo_m_FA)
-#summary(lm_Hc_DEG_f)
+lm_fx_DEG <- lm(fx ~ Genotype*Sex, geno_combined_DEG)
+summary(lm_fx_DEG)
+lm_fx_DEG_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_DEG_f)
+lm_fx_DEG_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_DEG_f)
 
 
 #omnibus testing
 #https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
 
-sink(paste(outpath, "Hc_DEG_SimpleStats.txt",sep=''))
+sink(paste(outpath, "fx_DEG_SimpleStats.txt",sep=''))
 'omnibus testing'
-joint_tests(ref_grid(lm_Hc_DEG)) 
-joint_tests(ref_grid(lm_Hc_DEG), by = "Sex", adjust = "sidak") 
-joint_tests(ref_grid(lm_Hc_DEG), by = "Genotype",adjust = "sidak" ) 
+joint_tests(ref_grid(lm_fx_DEG)) 
+joint_tests(ref_grid(lm_fx_DEG), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_DEG), by = "Genotype",adjust = "sidak" ) 
 
 'anova'
-anova(lm_Hc_DEG)
-#anova(lm_Hc_DEG_f)
-#anova(lm_Hc_DEG_m)
+anova(lm_fx_DEG)
+#anova(lm_fx_DEG_f)
+#anova(lm_fx_DEG_m)
 
 #post hoc comparison
-Hc_DEG.emm <- emmeans(lm_Hc_DEG , ~ Genotype | Sex, adjust = "sidak")
-contrast(Hc_DEG.emm, simple = c("Genotype", "Sex")) #FDR
-contrast(Hc_DEG.emm, simple = list("Genotype", "Sex"))
+fx_DEG.emm <- emmeans(lm_fx_DEG , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_DEG.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_DEG.emm, simple = list("Genotype", "Sex"))
 
 #post hoc tests
-summary(glht(lm_Hc_DEG, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
-res<-summary(glht(lm_Hc_DEG, emm(pairwise ~ Genotype*Sex))) #consider save to file
-#summary(as.glht(pairs(lm_Hc_DEG.emm), by = NULL))
+summary(glht(lm_fx_DEG, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_DEG, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_DEG.emm), by = NULL))
  
-summary(glht(lm_Hc_DEG, emm(pairwise ~ Genotype | Sex)))
-summary(glht(lm_Hc_DEG, emm(pairwise ~ Sex | Genotype)))
+summary(glht(lm_fx_DEG, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_DEG, emm(pairwise ~ Sex | Genotype)))
 
-mypairs<-pairs(Hc_DEG.emm) #_consider save to file
-pairs(Hc_DEG.emm, by="Genotype")
-pairs(Hc_DEG.emm, by="Sex")
+mypairs<-pairs(fx_DEG.emm) #_consider save to file
+pairs(fx_DEG.emm, by="Genotype")
+pairs(fx_DEG.emm, by="Sex")
 
 
 
-print('Hc DEG')
-emmip(lm_Hc_DEG, ~ Genotype | Sex )
-emmip(lm_Hc_DEG, ~ Sex | Genotype )
-emmip(lm_Hc_DEG, Genotype~ Sex  )
+print('fx DEG')
+emmip(lm_fx_DEG, ~ Genotype | Sex )
+emmip(lm_fx_DEG, ~ Sex | Genotype )
+emmip(lm_fx_DEG, Genotype~ Sex  )
 sink()
 
-plot(Hc_DEG.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
-horizontal = FALSE, colors = "darkgreen", main ="Hc DEG")
-ggsave(paste(outpath,'Hc_DEG_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+plot(fx_DEG.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx DEG")
+ggsave(paste(outpath,'fx_DEG_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
 
 ```
 
-```{r Hc_CLUS_stats, echo='FALSE'}
+```{r fx_CLUS_stats, echo='FALSE'}
 'simple stats'
 
-print('Hc') 
+print('fx') 
 
-lm_Hc_CLUS <- lm(Hc ~ Genotype*Sex, geno_combined_CLUS)
-summary(lm_Hc_CLUS)
-lm_Hc_CLUS_f <- lm(Hc ~ Genotype, combo_f_FA)
-#summary(lm_Hc_CLUS_f)
-lm_Hc_CLUS_m <- lm(Hc ~ Genotype, combo_m_FA)
-#summary(lm_Hc_CLUS_f)
+lm_fx_CLUS <- lm(fx ~ Genotype*Sex, geno_combined_CLUS)
+summary(lm_fx_CLUS)
+lm_fx_CLUS_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_CLUS_f)
+lm_fx_CLUS_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_CLUS_f)
 
 
 #omnibus testing
 #https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
 
-sink(paste(outpath, "Hc_CLUS_SimpleStats.txt",sep=''))
+sink(paste(outpath, "fx_CLUS_SimpleStats.txt",sep=''))
 'omnibus testing'
-joint_tests(ref_grid(lm_Hc_CLUS)) 
-joint_tests(ref_grid(lm_Hc_CLUS), by = "Sex", adjust = "sidak") 
-joint_tests(ref_grid(lm_Hc_CLUS), by = "Genotype",adjust = "sidak" ) 
+joint_tests(ref_grid(lm_fx_CLUS)) 
+joint_tests(ref_grid(lm_fx_CLUS), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_CLUS), by = "Genotype",adjust = "sidak" ) 
 
 'anova'
-anova(lm_Hc_CLUS)
-#anova(lm_Hc_CLUS_f)
-#anova(lm_Hc_CLUS_m)
+anova(lm_fx_CLUS)
+#anova(lm_fx_CLUS_f)
+#anova(lm_fx_CLUS_m)
 
 #post hoc comparison
-Hc_CLUS.emm <- emmeans(lm_Hc_CLUS , ~ Genotype | Sex, adjust = "sidak")
-contrast(Hc_CLUS.emm, simple = c("Genotype", "Sex")) #FDR
-contrast(Hc_CLUS.emm, simple = list("Genotype", "Sex"))
+fx_CLUS.emm <- emmeans(lm_fx_CLUS , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_CLUS.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_CLUS.emm, simple = list("Genotype", "Sex"))
 
 #post hoc tests
-summary(glht(lm_Hc_CLUS, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
-res<-summary(glht(lm_Hc_CLUS, emm(pairwise ~ Genotype*Sex))) #consider save to file
-#summary(as.glht(pairs(lm_Hc_CLUS.emm), by = NULL))
+summary(glht(lm_fx_CLUS, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_CLUS, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_CLUS.emm), by = NULL))
  
-summary(glht(lm_Hc_CLUS, emm(pairwise ~ Genotype | Sex)))
-summary(glht(lm_Hc_CLUS, emm(pairwise ~ Sex | Genotype)))
+summary(glht(lm_fx_CLUS, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_CLUS, emm(pairwise ~ Sex | Genotype)))
 
-mypairs<-pairs(Hc_CLUS.emm) #_consider save to file
-pairs(Hc_CLUS.emm, by="Genotype")
-pairs(Hc_CLUS.emm, by="Sex")
+mypairs<-pairs(fx_CLUS.emm) #_consider save to file
+pairs(fx_CLUS.emm, by="Genotype")
+pairs(fx_CLUS.emm, by="Sex")
 
 
 
-print('Hc CLUS') 
-emmip(lm_Hc_CLUS, ~ Genotype | Sex )
-emmip(lm_Hc_CLUS, ~ Sex | Genotype )
-emmip(lm_Hc_CLUS, Genotype~ Sex  )
+print('fx CLUS') 
+emmip(lm_fx_CLUS, ~ Genotype | Sex )
+emmip(lm_fx_CLUS, ~ Sex | Genotype )
+emmip(lm_fx_CLUS, Genotype~ Sex  )
 
 sink()
 
-plot(Hc_CLUS.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
-horizontal = FALSE, colors = "darkgreen", main ="Hc CLUS")
-ggsave(paste(outpath,'Hc_CLUS_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+plot(fx_CLUS.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx CLUS")
+ggsave(paste(outpath,'fx_CLUS_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
 
 ```

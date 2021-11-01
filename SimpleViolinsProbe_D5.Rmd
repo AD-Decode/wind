@@ -1,0 +1,213 @@
+---
+title: "SimpleViolins"
+author: "Alex Badea"
+date: "10/29/2021"
+output: pdf_document
+toc: true
+---
+
+---
+# Data sources
+
+We evaluate genotype and sex differences in mouse models of Alzheimer's disease risk, based on APOE alleles: APOE2 is protective, APOE3 is control, and APOE4 represents genetic risk for AD. One allele increases risk by 3 times, and two APOE4 alleles increase risk by 10 times (ref) in relation to APOE3 . We use multiple data sources:
+
+Morris Water Maze - testing spatial navigation memory
+Segmentation: regional volumes
+Microstructural properties: FA
+Tractography Based Connectivity: Degree, and Clustering Coefficient
+
+We read the data and normalize volumes to the whole brain.
+
+```{r setup, include=FALSE, echo=FALSE,warning = FALSE}
+
+
+knitr::opts_chunk$set(echo=FALSE,warning = FALSE)
+library(tidyverse)
+library(export)
+library(gridExtra)
+library(scales)
+library(ggplot2)
+library(cowplot)
+library(gplots)
+library(tidyverse)
+library(patternplot)
+library(lme4)
+library(visreg)
+library(tidyr)
+library(magrittr) 
+library(dplyr)
+library(ggpubr)
+library(lme4)
+library(lsmeans)
+library(emmeans)
+library(multcomp)
+library(zoo)
+#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE)
+
+data <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_FA <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_VOL <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_VOL.csv")
+
+data_DEG<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_DEG.csv")
+
+data_CLUS<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_CLUS.csv")
+
+outpath='/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
+
+#?data_FA$APOE<-as.factor(data_FA$APOE)?
+
+data_FA <- data_FA %>% 
+   filter(Genotype != "HN") 
+data_FA$APOE=data_FA$Genotype
+
+data_VOL <- data_VOL %>% 
+   filter(Genotype != "HN") 
+
+data_VOL[,15:347]=data_VOL[,15:347]/data_VOL[,348]
+data_VOL$APOE=data_VOL$Genotype
+
+data_DEG <- data_DEG %>% 
+   filter(Genotype != "HN") 
+data_DEG$APOE=data_DEG$Genotype
+
+data_CLUS <- data_CLUS %>% 
+   filter(Genotype != "HN") 
+data_CLUS$APOE=data_CLUS$Genotype
+
+
+# separating by sex
+geno_combined_FA <- data_FA
+combo_f_FA <- geno_combined_FA %>% 
+  filter(Sex == "female")
+combo_m_FA <- geno_combined_FA %>% 
+  filter(Sex == "male")
+
+geno_combined_VOL <- data_VOL
+combo_f_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "female")
+combo_m_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "male")
+
+geno_combined_DEG <- data_DEG
+combo_f_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "female")
+combo_m_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "male")
+
+geno_combined_CLUS <- data_CLUS
+combo_f_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "female")
+combo_m_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "male")
+
+dodge <- position_dodge(width = 1)
+```
+
+
+# Plots for Winding Number
+
+We embed plots for day d5 probe trials:
+
+```{r winding number plots, echo=FALSE, warning=FALSE}
+plot1FA<-ggplot(data_FA, aes(Sex, Probe_d5, fill = Sex)) +
+  geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
+  facet_grid(. ~ Genotype)  +
+  geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=2, alpha=0.6, position=dodge)+
+  #geom_jitter(size = 0.1, height = 0, width = 0.1, aes(color = Sex)) + 
+  labs(title = "WN: Probe Day d5")+
+  theme_minimal()+
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw()+
+  labs(x = "genotype", y = "WN: Probe day d5", title = "Winding Number Probe Day d5 ") +
+  stat_summary(fun.y=median, geom="point", size=2, color="black") +
+  theme_bw() 
+ 
+
+# plot2FA<-ggplot(data_FA, aes(Sex, Probe_d5, fill = Sex)) +
+#   geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
+#   facet_grid(. ~ Genotype)  +
+#   geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
+#   geom_dotplot(binaxis='y', stackdir='center', dotsize=2, alpha=0.6, position=dodge)+
+#   #geom_jitter(size = 0.1, height = 0, width = 0.1, aes(color = Sex)) + 
+#   labs(title = "WN: Probe Day d5")+
+#   theme_minimal()+
+#   background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+#   panel_border() + 
+#   theme_bw()+
+#   labs(x = "genotype", y = "WN: Probe day d5", title = "Winding Number Probe Day d5 ") +
+#   stat_summary(fun.y=median, geom="point", size=2, color="black") +
+#   theme_bw() 
+ 
+ggdraw() + 
+  draw_plot(plot1FA)
+# draw_plot(plot1FA, 0, .8, 1, .8) 
+#  draw_plot(plot2FA, 0, 0, 1, .8) 
+
+print('Probe day d5') 
+
+lm_Probe_d5 <- lm(Probe_d5 ~ Genotype*Sex, geno_combined_FA)
+#summary(lm_Probe_d5)
+lm_Probe_d5_f <- lm(Probe_d5 ~ Genotype, combo_f_FA)
+#summary(lm_Probe_d5_f)
+lm_Probe_d5_m <- lm(Probe_d5 ~ Genotype, combo_m_FA)
+#summary(lm_Probe_d5_m)
+
+#omnibus testing
+#https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
+
+sink(paste(outpath, "Winding_Probed5_stats102921.txt",sep=''))
+'probe day d5'
+'omnibus testing'
+
+joint_tests(ref_grid(lm_Probe_d5)) 
+joint_tests(ref_grid(lm_Probe_d5), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_Probe_d5), by = "Genotype",adjust = "sidak" ) 
+
+'anova'
+anova(lm_Probe_d5)
+#anova(lm_Probe_d5_f)
+#anova(lm_Probe_d5_m)
+
+#post hoc comparison
+Probe_d5.emm <- emmeans(lm_Probe_d5 , ~ Genotype | Sex, adjust = "sidak")
+contrast(Probe_d5.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(Probe_d5.emm, simple = list("Genotype", "Sex"))
+
+print('Probe Day d5 Abs Winding Number')
+emmip(lm_Probe_d5, ~ Genotype | Sex )
+
+# tw.emm <- contrast(Probe_d5.emm, interaction = c(Genotype = "poly", Sex = "consec"),
+# by = NULL)
+# tw.emm # see the estimates
+# coef(tw.emm) # see the contrast coefficients
+
+
+#post hoc tests
+summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(Probe_d5.emm), by = NULL))
+ 
+
+summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_Probe_d5, emm(pairwise ~ Sex | Genotype)))
+
+#warpbreaks$tw <- with(warpbreaks, interaction(tension, wool))
+#cell <- lm(breaks ~ tw - 1, data = warpbreaks)
+#summary(glht(cell, linfct = K))
+
+
+#emmeans(lm_Probe_d5, ~ Genotype*Sex, contr="tukey")
+mypairs<-pairs(Probe_d5.emm) #_consider save to file
+pairs(Probe_d5.emm, by="Genotype")
+pairs(Probe_d5.emm, by="Sex")
+sink()
+
+
+plot(Probe_d5.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="Probe Day d5")
+```
