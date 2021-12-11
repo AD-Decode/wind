@@ -1,0 +1,561 @@
+---
+title: "Absolute Winding Number by Hc Probe Day d8 "
+author: "alexandra badea"
+date: "10/28/2021"
+output: pdf_document
+toc: true
+---
+
+# Aim
+
+We examine whether APOE2, APOE3, and APOE4 carriers use a hippocampal or caudate based spatial navigation strategy. 
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE)
+
+library(tidyverse)
+library(cowplot)
+library(scales)
+# installing packages 
+library(tidyverse)
+library(cowplot)
+library(gplots)
+library(ggplot2)
+library(patternplot)
+library(lme4)
+library(visreg)
+library(tidyr)
+library(magrittr) 
+library(dplyr)
+library(ggpubr)
+library(lme4)
+library(lsmeans)
+library(emmeans)
+library(multcomp)
+library(zoo)
+library(ggpmisc)
+#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE, message=FALSE, fig.width = 15, fig.height = 15)
+
+
+outpath<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
+
+data <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_FA <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_VOL <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_VOL.csv")
+
+data_DEG<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_DEG.csv")
+
+data_CLUS<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_CLUS.csv")
+
+data <- data %>% 
+   filter(Genotype != "HN") 
+
+data_FA <- data_FA %>% 
+   filter(Genotype != "HN") 
+
+data_VOL <- data_VOL %>% 
+   filter(Genotype != "HN") 
+
+data_VOL[,15:347]=data_VOL[,15:347]/data_VOL[,348]
+
+data_DEG <- data_DEG %>% 
+   filter(Genotype != "HN") 
+
+data_CLUS <- data_CLUS %>% 
+   filter(Genotype != "HN") 
+
+
+
+# separating by sex
+geno_combined_FA <- data_FA
+combo_f_FA <- geno_combined_FA %>% 
+  filter(Sex == "female")
+combo_m_FA <- geno_combined_FA %>% 
+  filter(Sex == "male")
+
+geno_combined<-geno_combined_FA #temporary fix
+combo_f<-combo_f_FA
+combo_m<-combo_m_FA
+
+geno_combined_VOL <- data_VOL
+combo_f_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "female")
+combo_m_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "male")
+
+geno_combined_DEG <- data_DEG
+combo_f_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "female")
+combo_m_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "male")
+
+geno_combined_CLUS <- data_CLUS
+combo_f_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "female")
+combo_m_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "male")
+
+
+
+
+```
+ 
+
+# Day d8 Probe by Hc Vol
+
+
+``` {r HcVOLbbDayd8Probe, echo=FALSE}
+
+plotHcVOL <- ggplot(geno_combined_VOL, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Sex)) +
+  #ggrepel::geom_text_repel(label=rownames(geno_combined_VOL)) +
+  #geom_text(x=3,y=30,label=lm_eqn(geno_combined_VOL, 'Probe_d8','Hc'),color='red',parse=T) 
+  geom_smooth(formula = y ~ x, method = "lm") +
+  #stat_poly_eq(formula = y ~ x, 
+  #             aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+  #             parse = TRUE,
+  #             label.x.npc = "right",
+  #             vstep = 0.05)+ # sets vertical spacing+
+  
+  labs(title = "Winding Number ~ Volume:Hc; males and females",
+       #subtitle = "Both males and females",
+       x = "Hc VOL", y = "WN: Probe Day d8") +
+       theme_bw() +
+       theme(legend.position="bottom")+
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotHcVOLSex <- ggplot(geno_combined_VOL, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day d8",
+       x = "Hc VOL", y = "WN: Probe Day d8") +
+  theme(legend.position="bottom")
+
+
+#####
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_VOL)
+#summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_VOL)
+#summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_VOL)
+#summary(lm_m)
+
+#lm$coefficients
+
+sink(paste(outpath, "Winding_Probed8_by_Hc_VOL.txt")) 
+'Hc: Probe d8 AWN VOL'
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_VOL)
+summary(lm)
+lm$coefficients
+'omnibus test'
+joint_tests(ref_grid(lm)) 
+joint_tests(ref_grid(lm), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm), by = "Genotype",adjust = "sidak" ) 
+
+
+'anova: males and females'
+anova(lm)
+'females'
+anova(lm_f)
+'males'
+anova(lm_m)
+
+#summary(glht(lm, emm(pairwise ~ Genotype*Sex, contr="sidak")))
+'pairwise-sidak adjustments'
+
+lm.emm <- emmeans(lm , ~ Genotype | Sex, adjust = "sidak")
+mypairs<-pairs(lm.emm) #_consider save to file 
+pairs(lm.emm, by="Genotype") 
+pairs(lm.emm, by="Sex") 
+
+'slopes'
+print('VOL slopes')
+em1<-emtrends(lm, pairwise ~ Genotype, var = "Hc")
+em2<-emtrends(lm, pairwise ~ Genotype|Sex, var = "Hc")
+em3<-emtrends(lm, pairwise ~ Sex|Genotype, var = "Hc")
+
+css1 <- summary(em1,infer=TRUE)
+css2 <- summary(em2,infer=TRUE)
+css3 <- summary(em3,infer=TRUE)
+
+'slopes differences'
+css1$contrasts
+css2$contrasts
+css3$contrasts
+
+'non zero slopes'
+css1$emtrends
+css2$emtrends
+css3$emtrends
+sink()
+
+
+####
+
+
+
+
+```
+
+
+
+# Day d8 Probe By Hc FA
+
+``` {r HcFAybDayd8Probe}
+
+plotHcFA <- ggplot(geno_combined_FA, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  #stat_poly_eq(formula = y ~ x, 
+  #             aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+  #             parse = TRUE,
+   #            label.x.npc = "right",
+  #             vstep = 0.05)+ # sets vertical spacing+
+  theme_bw() +
+  labs(title = "Winding Number ~ FA: Hc, males and females",
+       #subtitle = "Both males and females",
+       x = "Hc FA", y = "WN: Probe Day d8") +
+       theme_bw() +
+       theme(legend.position="bottom")+
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotHcFASex <- ggplot(geno_combined_FA, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day d8",
+       x = "Hc FA", y = "WN: Probe Day d8") +
+  theme(legend.position="bottom")
+
+
+
+#####
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_FA)
+#summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_FA)
+#summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_FA)
+#summary(lm_m)
+
+summary(lm)
+lm$coefficients
+
+sink(paste(outpath, "Winding_Probed8_by_Hc_FA.txt")) 
+'Hc: Probe d8 AWN FA'
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_FA)
+'omnibus test'
+joint_tests(ref_grid(lm)) 
+joint_tests(ref_grid(lm), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm), by = "Genotype",adjust = "sidak" ) 
+
+
+'anova: males and females'
+anova(lm)
+'females'
+anova(lm_f)
+'males'
+anova(lm_m)
+
+#summary(glht(lm, emm(pairwise ~ Genotype*Sex, contr="sidak")))
+'pairwise-sidak adjustments'
+
+lm.emm <- emmeans(lm , ~ Genotype | Sex, adjust = "sidak")
+mypairs<-pairs(lm.emm) #_consider save to file 
+pairs(lm.emm, by="Genotype") 
+pairs(lm.emm, by="Sex") 
+
+'slopes'
+print('FA slopes')
+em1<-emtrends(lm, pairwise ~ Genotype, var = "Hc")
+em2<-emtrends(lm, pairwise ~ Genotype|Sex, var = "Hc")
+em3<-emtrends(lm, pairwise ~ Sex|Genotype, var = "Hc")
+
+css1 <- summary(em1,infer=TRUE)
+css2 <- summary(em2,infer=TRUE)
+css3 <- summary(em3,infer=TRUE)
+
+'slopes differences'
+css1$contrasts
+css2$contrasts
+css3$contrasts
+
+'non zero slopes'
+css1$emtrends
+css2$emtrends
+css3$emtrends
+sink()
+
+
+####
+
+
+
+
+```
+
+
+
+
+
+# Day d8 Probe By Hc DEG
+
+``` {r HcDEGybDayd8Probe}
+
+plotHcDEG <- ggplot(geno_combined_DEG, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+        scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+        scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+        geom_point(aes(shape = Sex)) +
+        geom_smooth(formula = y ~ x, method = "lm") +
+       # stat_poly_eq(formula = y ~ x, 
+       #        aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+       #        parse = TRUE,
+       #        label.x.npc = "right",
+       #        vstep = 0.05)+ # sets vertical spacing+
+        theme_bw() +
+        labs(title = "Winding Number ~ DEG: Hc, males and females",
+       #subtitle = "Both males and females",
+       x = "Hc DEG", y = "WN: Probe Day d8") +
+       theme_bw() +
+       theme(legend.position="bottom")+
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotHcDEGSex <- ggplot(geno_combined_DEG, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day d8",
+       x = "Hc DEG", y = "WN: Probe Day d8") +
+  theme(legend.position="bottom")
+
+
+
+#####
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm$coefficients
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_DEG)
+#summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_DEG)
+#summary(lm_m)
+
+sink(paste(outpath, "Winding_Probed8_by_Hc_DEG.txt")) 
+'Hc: Probe d8 AWN DEG'
+c
+'omnibus test'
+joint_tests(ref_grid(lm)) 
+joint_tests(ref_grid(lm), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm), by = "Genotype",adjust = "sidak" ) 
+
+
+'anova: males and females'
+anova(lm)
+'females'
+anova(lm_f)
+'males'
+anova(lm_m)
+
+#summary(glht(lm, emm(pairwise ~ Genotype*Sex, contr="sidak")))
+'pairwise-sidak adjustments'
+
+lm.emm <- emmeans(lm , ~ Genotype | Sex, adjust = "sidak")
+mypairs<-pairs(lm.emm) #_consider save to file 
+pairs(lm.emm, by="Genotype") 
+pairs(lm.emm, by="Sex") 
+
+'slopes'
+print('DEG slopes')
+em1<-emtrends(lm, pairwise ~ Genotype, var = "Hc")
+em2<-emtrends(lm, pairwise ~ Genotype|Sex, var = "Hc")
+em3<-emtrends(lm, pairwise ~ Sex|Genotype, var = "Hc")
+
+css1 <- summary(em1,infer=TRUE)
+css2 <- summary(em2,infer=TRUE)
+css3 <- summary(em3,infer=TRUE)
+
+'slopes differences'
+css1$contrasts
+css2$contrasts
+css3$contrasts
+
+'non zero slopes'
+css1$emtrends
+css2$emtrends
+css3$emtrends
+
+sink()
+
+
+####
+
+
+```
+
+# Day d8 Probe By Hc CLUS
+
+``` {r HcCLUSybDayd8Probe}
+
+
+
+
+plotHcCLUS <- ggplot(geno_combined_CLUS, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  #stat_poly_eq(formula = y ~ x, 
+  #             aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+  #             parse = TRUE,
+  #             label.x.npc = "right",
+  #             vstep = 0.05)+ # sets vertical spacing+
+  theme_bw() +
+  #stat_cor(label.y = 50) +
+  #stat_regline_equation(label.y = 40)+
+  labs(title = "Winding Number ~ CLUS: Hc, males and females",
+       #subtitle = "Both males and females",
+       x = "Hc CLUS", y = "WN: Probe Day d8") +
+       theme_bw() +
+       theme(legend.position="bottom")+
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotHcCLUSSex <- ggplot(geno_combined_CLUS, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Clustering Coefficient",
+       x = "Hc CLUS", y = "WN: Probe Day d8") +
+  theme(legend.position="bottom")
+  #stat_cor() +
+  #stat_regline_equation()
+
+#ggdraw() + 
+#  draw_plot(plot1, 0, .5, 1, .5) +
+#  draw_plot(plot2, 0, 0, 1, .5) 
+
+
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_CLUS)
+#summary(lm)
+lm_f <- lm(Probe_d8 ~ Hc*Genotype, combo_f_CLUS)
+#summary(lm_f)
+lm_m <- lm(Probe_d8 ~ Hc*Genotype, combo_m_CLUS)
+#summary(lm_m)
+
+summary(lm)
+lm$coefficients
+
+sink(paste(outpath, "Winding_Probed8_by_Hc_CLUS.txt")) 
+'Hc: Probe d8 AWN CLUSTERING'
+lm <- lm(Probe_d8 ~ Hc*Genotype*Sex, geno_combined_CLUS)
+'omnibus test'
+joint_tests(ref_grid(lm)) 
+joint_tests(ref_grid(lm), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm), by = "Genotype",adjust = "sidak" ) 
+
+joint_tests(lm)
+
+'anova: males and females'
+anova(lm)
+'females'
+anova(lm_f)
+'males'
+anova(lm_m)
+
+#summary(glht(lm, emm(pairwise ~ Genotype*Sex, contr="sidak")))
+'pairwise-sidak adjustments'
+
+lm.emm <- emmeans(lm, ~ Genotype | Sex, adjust = "sidak")
+mypairs<-pairs(lm.emm) #_consider save to file 
+pairs(lm.emm, by="Genotype") 
+pairs(lm.emm, by="Sex") 
+'slopes'
+#m.slopes <- lstrends(lm, 'Genotype', var='Hc')
+#pairs(m.slopes)
+
+#slopes
+#https://cran.r-project.org/web/packages/emmeans/vignettes/interactions.html#contrasts
+
+
+print('CLUS slopes')
+em1<-emtrends(lm, pairwise ~ Genotype, var = "Hc")
+em2<-emtrends(lm, pairwise ~ Genotype|Sex, var = "Hc")
+em3<-emtrends(lm, pairwise ~ Sex|Genotype, var = "Hc")
+
+css1 <- summary(em1,infer=TRUE)
+css2 <- summary(em2,infer=TRUE)
+css3 <- summary(em3,infer=TRUE)
+
+'slopes differences'
+css1$contrasts
+css2$contrasts
+css3$contrasts
+
+'non zero slopes'
+css1$emtrends
+css2$emtrends
+css3$emtrends
+
+sink()
+ 
+
+
+
+
+```
+
+
+``` {r HcWindingbyMRIGraphs}
+
+ggarrange(plotHcVOL, plotHcVOLSex, plotHcFA, plotHcFASex, 
+          plotHcDEG, plotHcDEGSex, plotHcCLUS, plotHcCLUSSex,
+          #labels = c("A: Day d8", "B: Day d8"),
+          ncol = 2, nrow = 4)
+
+ggsave(paste(outpath,'Probed8_Winding_by_Hc.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=10, height=20, unit=c("in"), dpi=200)
+
+```
+

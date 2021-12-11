@@ -1,0 +1,483 @@
+---
+title: "SimpleViolins"
+author: "Alex Badea"
+date: "10/29/2021"
+output: pdf_document
+toc: true
+---
+
+---
+# Data sources
+
+We evaluate genotype and sex differences in mouse models of Alzheimer's disease risk, based on APOE alleles: APOE2 is protective, APOE3 is control, and APOE4 represents genetic risk for AD. One allele increases risk by 3 times, and two APOE4 alleles increase risk by 10 times (ref) in relation to APOE3 . We use multiple data sources:
+
+Morris Water Maze - testing spatial navigation memory
+Segmentation: regional volumes
+Microstructural properties: FA
+Tractography Based Connectivity: Degree, and Clustering Coefficient
+
+We read the data and normalize volumes to the whole brain.
+
+```{r setup, include=FALSE, echo=FALSE,warning = FALSE}
+
+
+knitr::opts_chunk$set(echo=FALSE,warning = FALSE)
+library(tidyverse)
+library(export)
+library(gridExtra)
+library(scales)
+library(ggplot2)
+library(cowplot)
+library(gplots)
+library(tidyverse)
+library(patternplot)
+library(lme4)
+library(visreg)
+library(tidyr)
+library(magrittr) 
+library(dplyr)
+library(ggpubr)
+library(lme4)
+library(lsmeans)
+library(emmeans)
+library(multcomp)
+library(zoo)
+#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE, fig.height=4, fig.width=16, out.width = "80%")
+
+data <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_FA <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_VOL <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_VOL.csv")
+
+data_DEG<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_DEG.csv")
+
+data_CLUS<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_CLUS.csv")
+
+outpath='/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
+
+#?data_FA$APOE<-as.factor(data_FA$APOE)?
+
+data_FA <- data_FA %>% 
+   filter(Genotype != "HN") 
+data_FA$APOE=data_FA$Genotype
+
+data_VOL <- data_VOL %>% 
+   filter(Genotype != "HN") 
+
+data_VOL[,15:347]=data_VOL[,15:347]/data_VOL[,348]
+data_VOL$APOE=data_VOL$Genotype
+
+data_DEG <- data_DEG %>% 
+   filter(Genotype != "HN") 
+data_DEG$APOE=data_DEG$Genotype
+
+data_CLUS <- data_CLUS %>% 
+   filter(Genotype != "HN") 
+data_CLUS$APOE=data_CLUS$Genotype
+
+
+# separating by sex
+geno_combined_FA <- data_FA
+combo_f_FA <- geno_combined_FA %>% 
+  filter(Sex == "female")
+combo_m_FA <- geno_combined_FA %>% 
+  filter(Sex == "male")
+
+geno_combined_VOL <- data_VOL
+combo_f_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "female")
+combo_m_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "male")
+
+geno_combined_DEG <- data_DEG
+combo_f_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "female")
+combo_m_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "male")
+
+geno_combined_CLUS <- data_CLUS
+combo_f_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "female")
+combo_m_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "male")
+
+dodge <- position_dodge(width = 1)
+```
+
+
+# Plots for fx
+
+We embed plots for day d8 probe trials:
+
+```{r fx plots, echo=FALSE, warning=FALSE}
+plot1VOL<-ggplot(data_VOL, aes(x=Sex, y=fx, fill = Genotype, alpha=Sex)) +
+  geom_violin(inherit.aes=TRUE,position=dodge) +
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  facet_grid(. ~ Genotype)  +
+  facet_wrap(~Genotype) +
+  scale_alpha_discrete(range = c(0.4,0.8)) +
+  geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=2, alpha=0.6, position=dodge)+
+  #geom_jitter(size = 0.1, height = 0, width = 0.1, aes(color = Sex)) + 
+  labs(title = "VOL")+
+  theme_minimal()+
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw()+
+  labs(x = "genotype", y = "VOL", title = "VOL ") +
+  stat_summary(fun.y=median, geom="point", size=2, color="black") +
+  theme(legend.position="bottom")+
+  theme_bw() 
+ 
+
+plot1FA<-ggplot(data_FA, aes(Sex, fx, fill = Genotype, alpha=Sex)) +
+  geom_violin(inherit.aes=TRUE,position=dodge) +
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  facet_grid(. ~ Genotype)  +
+  facet_wrap(~Genotype) +
+ # facet_grid(. ~ Genotype)  +
+  geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=2, alpha=0.6, position=dodge)+
+  facet_wrap(~Genotype) +
+  scale_alpha_discrete(range = c(0.4,0.8)) +
+  #geom_jitter(size = 0.1, height = 0, width = 0.1, aes(color = Sex)) + 
+  labs(title = "FA")+
+  theme_minimal()+
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw()+
+  labs(x = "genotype", y = "FA", title = "FA ") +
+  stat_summary(fun.y=median, geom="point", size=2, color="black") +
+  theme(legend.position="bottom")+
+  theme_bw() 
+
+plot1DEG<-ggplot(data_DEG, aes(Sex, fx, fill = Genotype, alpha=Sex)) +
+  geom_violin(inherit.aes=TRUE,position=dodge) +
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  facet_grid(. ~ Genotype)  +
+  facet_wrap(~Genotype) +
+  geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=2, alpha=0.6, position=dodge)+
+  facet_wrap(~Genotype) +
+  scale_alpha_discrete(range = c(0.4,0.8)) +
+  #geom_jitter(size = 0.1, height = 0, width = 0.1, aes(color = Sex)) + 
+  labs(title = "DEG")+
+  theme_minimal()+
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw()+
+  labs(x = "genotype", y = "DEG", title = "DEG ") +
+  stat_summary(fun.y=median, geom="point", size=2, color="black") +
+  theme(legend.position="bottom")+
+  theme_bw()
+
+#plot1CLUS<-ggplot(data_CLUS, aes(Sex, fx, fill = Sex)) +
+#  geom_violin(inherit.aes=TRUE,position=dodge, alpha=0.8) +
+  
+plot1CLUS<-ggplot(data_CLUS, aes(Sex, fx, fill = Genotype, alpha=Sex)) +
+  geom_violin(inherit.aes=TRUE,position=dodge) +
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  facet_grid(. ~ Genotype)  +
+  facet_wrap(~Genotype) +
+  scale_alpha_discrete(range = c(0.4,0.8)) +
+  geom_boxplot(color="black", outlier.color="black", width=0.2, alpha=.8, position=dodge) +
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=2, alpha=0.6, position=dodge)+
+  #geom_jitter(size = 0.1, height = 0, width = 0.1, aes(color = Sex)) + 
+  labs(title = "CLUS")+
+  theme_minimal()+
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw()+
+  labs(x = "genotype", y = "CLUS", title = "CLUS ") +
+  stat_summary(fun.y=median, geom="point", size=2, color="black") +
+  theme(legend.position="bottom")+
+  theme_bw()
+ 
+
+plot<-ggarrange(plot1VOL, plot1FA, plot1DEG, plot1CLUS, 
+         # labels = c("Volume", "FA", "DEG", "CLUS" ),
+          ncol = 4, nrow = 1, common.legend = TRUE, legend="bottom")
+
+annotate_figure(plot, top = text_grob("fx", 
+               color = "black", face = "bold", size = 14))
+
+ggsave(paste(outpath,'fx_4metrics_shortset.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+
+#https://rpubs.com/aaronsc32/regression-confidence-prediction-intervals
+
+#fx_VOL_Probe_d5.lm <- lm(Probe_d5 ~ fx, data = cars)
+#summary(fx_VOL_Probe_d5.lm)
+```
+
+```{r fx_VOL_stats, echo='FALSE'}
+
+
+print('fx') 
+
+lm_fx_VOL <- lm(fx ~ Genotype*Sex, geno_combined_VOL)
+summary(lm_fx_VOL)
+lm_fx_VOL_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_VOL_f)
+lm_fx_VOL_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_VOL_f)
+
+
+#omnibus testing
+#https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
+
+#33333
+sink(paste(outpath, "fx_VOL_SimpleModels.txt"))
+mydata.lm <- lm(fx ~ Genotype*Sex, data = geno_combined_VOL)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ Genotype|Sex, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ Sex| Genotype)))
+sink()
+#3333
+
+sink(paste(outpath, "fx_VOL_SimpleStats.txt",sep=''))
+'omnibus testing'
+joint_tests(ref_grid(lm_fx_VOL)) 
+joint_tests(ref_grid(lm_fx_VOL), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_VOL), by = "Genotype",adjust = "sidak" ) 
+
+'anova'
+anova(lm_fx_VOL)
+#anova(lm_fx_VOL_f)
+#anova(lm_fx_VOL_m)
+
+#post hoc comparison
+fx_VOL.emm <- emmeans(lm_fx_VOL , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_VOL.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_VOL.emm, simple = list("Genotype", "Sex"))
+
+#post hoc tests
+summary(glht(lm_fx_VOL, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_VOL, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_VOL.emm), by = NULL))
+ 
+summary(glht(lm_fx_VOL, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_VOL, emm(pairwise ~ Sex | Genotype)))
+
+mypairs<-pairs(fx_VOL.emm) #_consider save to file
+pairs(fx_VOL.emm, by="Genotype")
+pairs(fx_VOL.emm, by="Sex")
+
+
+print('fx VOL')
+emmip(lm_fx_VOL, ~ Genotype | Sex )
+emmip(lm_fx_VOL, ~ Sex | Genotype )
+emmip(lm_fx_VOL, Genotype~ Sex  )
+
+sink()
+
+
+
+plot(fx_VOL.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx VOL")
+ggsave(paste(outpath,'fx_VOL_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+
+```
+
+```{r fx_FA_stats, echo='FALSE'}
+'simple stats'
+
+print('fx') 
+
+lm_fx_FA <- lm(fx ~ Genotype*Sex, geno_combined_FA)
+summary(lm_fx_FA)
+lm_fx_FA_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_FA_f)
+lm_fx_FA_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_FA_f)
+
+
+#33333
+sink(paste(outpath, "fx_FA_SimpleModels.txt"))
+mydata.lm <- lm(fx ~ Genotype*Sex, data = geno_combined_FA)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ Genotype|Sex, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ Sex| Genotype)))
+sink()
+#3333
+
+#omnibus testing
+#https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
+
+sink(paste(outpath, "fx_FA_SimpleStats.txt",sep=''))
+'omnibus testing'
+joint_tests(ref_grid(lm_fx_FA)) 
+joint_tests(ref_grid(lm_fx_FA), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_FA), by = "Genotype",adjust = "sidak" ) 
+
+'anova'
+anova(lm_fx_FA)
+#anova(lm_fx_FA_f)
+#anova(lm_fx_FA_m)
+
+#post hoc comparison
+fx_FA.emm <- emmeans(lm_fx_FA , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_FA.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_FA.emm, simple = list("Genotype", "Sex"))
+
+#post hoc tests
+summary(glht(lm_fx_FA, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_FA, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_FA.emm), by = NULL))
+ 
+summary(glht(lm_fx_FA, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_FA, emm(pairwise ~ Sex | Genotype)))
+
+mypairs<-pairs(fx_FA.emm) #_consider save to file
+pairs(fx_FA.emm, by="Genotype")
+pairs(fx_FA.emm, by="Sex")
+
+print('fx FA')
+emmip(lm_fx_FA, ~ Genotype | Sex )
+emmip(lm_fx_FA, ~ Sex | Genotype )
+emmip(lm_fx_FA, Genotype~ Sex  )
+sink()
+
+plot(fx_FA.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx FA")
+ggsave(paste(outpath,'fx_FA_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+
+```
+
+```{r fx_DEG_stats, echo='FALSE'}
+'simple stats'
+
+print('fx') 
+
+lm_fx_DEG <- lm(fx ~ Genotype*Sex, geno_combined_DEG)
+summary(lm_fx_DEG)
+lm_fx_DEG_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_DEG_f)
+lm_fx_DEG_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_DEG_f)
+
+#33333
+sink(paste(outpath, "fx_DEG_SimpleModels.txt"))
+mydata.lm <- lm(fx ~ Genotype*Sex, data = geno_combined_DEG)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ Genotype|Sex, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ Sex| Genotype)))
+sink()
+#3333
+
+#omnibus testing
+#https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
+
+sink(paste(outpath, "fx_DEG_SimpleStats.txt",sep=''))
+'omnibus testing'
+joint_tests(ref_grid(lm_fx_DEG)) 
+joint_tests(ref_grid(lm_fx_DEG), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_DEG), by = "Genotype",adjust = "sidak" ) 
+
+'anova'
+anova(lm_fx_DEG)
+#anova(lm_fx_DEG_f)
+#anova(lm_fx_DEG_m)
+
+#post hoc comparison
+fx_DEG.emm <- emmeans(lm_fx_DEG , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_DEG.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_DEG.emm, simple = list("Genotype", "Sex"))
+
+#post hoc tests
+summary(glht(lm_fx_DEG, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_DEG, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_DEG.emm), by = NULL))
+ 
+summary(glht(lm_fx_DEG, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_DEG, emm(pairwise ~ Sex | Genotype)))
+
+mypairs<-pairs(fx_DEG.emm) #_consider save to file
+pairs(fx_DEG.emm, by="Genotype")
+pairs(fx_DEG.emm, by="Sex")
+
+
+
+print('fx DEG')
+emmip(lm_fx_DEG, ~ Genotype | Sex )
+emmip(lm_fx_DEG, ~ Sex | Genotype )
+emmip(lm_fx_DEG, Genotype~ Sex  )
+sink()
+
+plot(fx_DEG.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx DEG")
+ggsave(paste(outpath,'fx_DEG_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+
+```
+
+```{r fx_CLUS_stats, echo='FALSE'}
+'simple stats'
+
+print('fx') 
+
+lm_fx_CLUS <- lm(fx ~ Genotype*Sex, geno_combined_CLUS)
+summary(lm_fx_CLUS)
+lm_fx_CLUS_f <- lm(fx ~ Genotype, combo_f_FA)
+#summary(lm_fx_CLUS_f)
+lm_fx_CLUS_m <- lm(fx ~ Genotype, combo_m_FA)
+#summary(lm_fx_CLUS_f)
+
+#33333
+sink(paste(outpath, "fx_CLUS_SimpleModels.txt"))
+mydata.lm <- lm(fx ~ Genotype*Sex, data = geno_combined_CLUS)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ Genotype|Sex, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ Sex| Genotype)))
+sink()
+#3333
+
+#omnibus testing
+#https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
+
+sink(paste(outpath, "fx_CLUS_SimpleStats.txt",sep=''))
+'omnibus testing'
+joint_tests(ref_grid(lm_fx_CLUS)) 
+joint_tests(ref_grid(lm_fx_CLUS), by = "Sex", adjust = "sidak") 
+joint_tests(ref_grid(lm_fx_CLUS), by = "Genotype",adjust = "sidak" ) 
+
+'anova'
+anova(lm_fx_CLUS)
+#anova(lm_fx_CLUS_f)
+#anova(lm_fx_CLUS_m)
+
+#post hoc comparison
+fx_CLUS.emm <- emmeans(lm_fx_CLUS , ~ Genotype | Sex, adjust = "sidak")
+contrast(fx_CLUS.emm, simple = c("Genotype", "Sex")) #FDR
+contrast(fx_CLUS.emm, simple = list("Genotype", "Sex"))
+
+#post hoc tests
+summary(glht(lm_fx_CLUS, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+res<-summary(glht(lm_fx_CLUS, emm(pairwise ~ Genotype*Sex))) #consider save to file
+#summary(as.glht(pairs(lm_fx_CLUS.emm), by = NULL))
+ 
+summary(glht(lm_fx_CLUS, emm(pairwise ~ Genotype | Sex)))
+summary(glht(lm_fx_CLUS, emm(pairwise ~ Sex | Genotype)))
+
+mypairs<-pairs(fx_CLUS.emm) #_consider save to file
+pairs(fx_CLUS.emm, by="Genotype")
+pairs(fx_CLUS.emm, by="Sex")
+
+
+
+print('fx CLUS') 
+emmip(lm_fx_CLUS, ~ Genotype | Sex )
+emmip(lm_fx_CLUS, ~ Sex | Genotype )
+emmip(lm_fx_CLUS, Genotype~ Sex  )
+
+sink()
+
+plot(fx_CLUS.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
+horizontal = FALSE, colors = "darkgreen", main ="fx CLUS")
+ggsave(paste(outpath,'fx_CLUS_emmeans.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+
+```
