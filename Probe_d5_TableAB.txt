@@ -1,0 +1,79 @@
+$`Sex = female`
+
+	 Simultaneous Tests for General Linear Hypotheses
+
+Fit: lm(formula = Probe_d5 ~ Genotype * Sex, data = geno_combined_FA)
+
+Linear Hypotheses:
+                     Estimate Std. Error t value Pr(>|t|)  
+APOE22 - APOE33 == 0    1.213      2.853   0.425   0.9053  
+APOE22 - APOE44 == 0   -7.632      2.471  -3.089   0.0137 *
+APOE33 - APOE44 == 0   -8.845      2.853  -3.100   0.0133 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+(Adjusted p values reported -- single-step method)
+
+
+$`Sex = male`
+
+	 Simultaneous Tests for General Linear Hypotheses
+
+Fit: lm(formula = Probe_d5 ~ Genotype * Sex, data = geno_combined_FA)
+
+Linear Hypotheses:
+                     Estimate Std. Error t value Pr(>|t|)
+APOE22 - APOE33 == 0    2.079      2.365   0.879    0.659
+APOE22 - APOE44 == 0   -1.761      2.365  -0.745    0.740
+APOE33 - APOE44 == 0   -3.840      2.471  -1.554    0.285
+(Adjusted p values reported -- single-step method)
+
+
+
+	 Simultaneous Tests for General Linear Hypotheses
+
+Linear Hypotheses:
+                             Estimate Std. Error t value Pr(>|t|)  
+APOE22 - APOE33, female == 0    1.213      2.853   0.425   0.9903  
+APOE22 - APOE44, female == 0   -7.632      2.471  -3.089   0.0269 *
+APOE33 - APOE44, female == 0   -8.845      2.853  -3.100   0.0263 *
+APOE22 - APOE33, male == 0      2.079      2.365   0.879   0.8768  
+APOE22 - APOE44, male == 0     -1.761      2.365  -0.745   0.9279  
+APOE33 - APOE44, male == 0     -3.840      2.471  -1.554   0.4776  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+(Adjusted p values reported -- single-step method)
+
+
+	 Simultaneous Tests for General Linear Hypotheses
+
+Linear Hypotheses:
+                             Estimate Std. Error t value Pr(>|t|)  
+APOE22 - APOE33, female == 0    1.213      2.853   0.425   0.9904  
+APOE22 - APOE44, female == 0   -7.632      2.471  -3.089   0.0269 *
+APOE33 - APOE44, female == 0   -8.845      2.853  -3.100   0.0263 *
+APOE22 - APOE33, male == 0      2.079      2.365   0.879   0.8768  
+APOE22 - APOE44, male == 0     -1.761      2.365  -0.745   0.9279  
+APOE33 - APOE44, male == 0     -3.840      2.471  -1.554   0.4777  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+(Adjusted p values reported -- single-step method)
+
+
+Call:
+lm(formula = cars$speed ~ cars$dist)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-7.5293 -2.1550  0.3615  2.4377  6.4179 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  8.28391    0.87438   9.474 1.44e-12 ***
+cars$dist    0.16557    0.01749   9.464 1.49e-12 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.156 on 48 degrees of freedom
+Multiple R-squared:  0.6511,	Adjusted R-squared:  0.6438 
+F-statistic: 89.57 on 1 and 48 DF,  p-value: 1.49e-12
+

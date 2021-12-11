@@ -1,0 +1,270 @@
+---
+title: "winding_by_vol"
+author: "alexandra badea"
+date: "10/4/2021"
+output: pdf_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE)
+library(tidyverse)
+library(cowplot)
+library(scales)
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE)
+
+data <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_VOL.csv")
+
+data <- data %>% 
+   filter(Genotype != "HN") 
+
+data[,15:347]=data[,15:347]/data[,348]
+  
+# ad <- data %>% 
+#   filter(! is.na(Weight)) %>% 
+#   mutate(sex = case_when(
+#     sex == "F" ~ "Female",
+#     sex == "M" ~ "Male"
+#   )) %>% 
+#   filter(risk_for_ad != 3)
+# 
+# # data by genotypes
+# e23 <- ad %>% 
+#   filter(genotype == "APOE23") 
+# e33 <- ad %>% 
+#   filter(genotype == "APOE33")
+# e34 <- ad %>% 
+#   filter(genotype == "APOE34")
+# 
+# # combining genotypes 
+# geno_combined <- ad %>% 
+#   mutate(Genotype = case_when(
+#     genotype == "APOE23" | genotype == "APOE33" ~ "APOE3",
+#     genotype == "APOE34" | genotype == "APOE44" ~ "APOE4"
+#   )) 
+
+
+# separating by sex
+geno_combined <- data
+combo_f <- geno_combined %>% 
+  filter(Sex == "female")
+
+combo_m <- geno_combined %>% 
+  filter(Sex == "male")
+
+```
+
+
+``` {r Brain Volume Day 5 Probe}
+
+plot1 <- ggplot(geno_combined, aes(x = Brain, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined, aes(Brain, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ Genotype*Sex, geno_combined)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Genotype, combo_f)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Genotype, combo_m)
+summary(lm_m)
+
+anova(lm)
+anova(lm_f)
+anova(lm_m)
+
+```
+
+
+``` {r Hippocampus Volume Day 5 Probe}
+
+plot1 <- ggplot(geno_combined, aes(x = Hc, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined, aes(Hc, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ Genotype*Sex, geno_combined)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Genotype, combo_f)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Genotype, combo_m)
+summary(lm_m)
+
+anova(lm)
+anova(lm_f)
+anova(lm_m)
+
+```
+
+``` {r Striatum Volume Day 5 Probe}
+plot1 <- ggplot(geno_combined, aes(x = CPu, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined, aes(CPu, Probe_d5, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ Genotype*Sex, geno_combined)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Genotype, combo_f)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Genotype, combo_m)
+summary(lm_m)
+
+anova(lm)
+anova(lm_f)
+anova(lm_m)
+
+```
+
+
+``` {r Brain Volume Day 8 Probe}
+
+plot1 <- ggplot(geno_combined, aes(x = Brain, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined, aes(Brain, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ Genotype*Sex, geno_combined)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Genotype, combo_f)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Genotype, combo_m)
+summary(lm_m)
+
+anova(lm)
+anova(lm_f)
+anova(lm_m)
+
+```
+
+
+``` {r Hippocampus Volume Day 8 Probe}
+
+plot1 <- ggplot(geno_combined, aes(x = Hc, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined, aes(Hc, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ Genotype*Sex, geno_combined)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Genotype, combo_f)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Genotype, combo_m)
+summary(lm_m)
+
+anova(lm)
+anova(lm_f)
+anova(lm_m)
+
+```
+
+``` {r Striatum Volume Day 8 Probe}
+plot1 <- ggplot(geno_combined, aes(x = CPu, y = Probe_d8,
+                          color = Genotype,  fill = Genotype)) + 
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_bw() 
+
+plot4 <- ggplot(geno_combined, aes(CPu, Probe_d8, 
+                                   color = Genotype, fill = Genotype)) + 
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  theme(legend.position="none")
+
+ggdraw() + 
+  draw_plot(plot1, 0, .5, 1, .5) +
+  draw_plot(plot4, 0, 0, 1, .5) 
+
+lm <- lm(Probe_d5 ~ Genotype*Sex, geno_combined)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ Genotype, combo_f)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ Genotype, combo_m)
+summary(lm_m)
+
+anova(lm)
+anova(lm_f)
+anova(lm_m)
+
+```

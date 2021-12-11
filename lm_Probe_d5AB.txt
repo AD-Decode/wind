@@ -1,0 +1,15 @@
+
+	 Simultaneous Tests for General Linear Hypotheses
+
+Linear Hypotheses:
+                             Estimate Std. Error t value Pr(>|t|)  
+APOE22 - APOE33, female == 0    1.213      2.853   0.425   0.9904  
+APOE22 - APOE44, female == 0   -7.632      2.471  -3.089   0.0269 *
+APOE33 - APOE44, female == 0   -8.845      2.853  -3.100   0.0263 *
+APOE22 - APOE33, male == 0      2.079      2.365   0.879   0.8767  
+APOE22 - APOE44, male == 0     -1.761      2.365  -0.745   0.9278  
+APOE33 - APOE44, male == 0     -3.840      2.471  -1.554   0.4776  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+(Adjusted p values reported -- single-step method)
+
