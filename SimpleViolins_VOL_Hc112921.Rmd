@@ -1,7 +1,7 @@
 ---
 title: "SimpleViolins"
 author: "Alex Badea"
-date: "10/29/2021"
+date: "11/29/2021"
 output: pdf_document
 toc: true
 ---
@@ -22,6 +22,7 @@ We read the data and normalize volumes to the whole brain.
 
 
 knitr::opts_chunk$set(echo=FALSE,warning = FALSE)
+library(ggpubr)
 library(tidyverse)
 library(export)
 library(gridExtra)
@@ -56,6 +57,8 @@ data_DEG<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNu
 data_CLUS<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_CLUS.csv")
 
 outpath='/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
+
+my_comparisons <- list( c("APOE22", "APOE33"), c("APOE22", "APOE44"), c("APOE33", "APOE44") )
 
 #?data_FA$APOE<-as.factor(data_FA$APOE)?
 
@@ -187,6 +190,52 @@ annotate_figure(plot, top = text_grob("Hc",
 
 ggsave(paste(outpath,'Hc_4metrics_shortset.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
 
+
+
+######with stat-compare
+
+plot_stat_VOL<-ggline(geno_combined_VOL, x = "Genotype", y = "Hc",
+          color = "Genotype", fill = "Genotype", error.plot='errorbar', add='mean_se', palette = c('blueviolet','chartreuse1','red'), size=1, 
+       point.size = 1.5, ylab='Hc Volume')+ 
+  #stat_compare_means(comparisons = my_comparisons)
+  stat_compare_means(comparisons = my_comparisons, method="t.test")+
+  stat_compare_means(label.y = 0.1)
+
+plot_stat_FA<-ggline(geno_combined_FA, x = "Genotype", y = "Hc",
+          color = "Genotype", fill = "Genotype", error.plot='errorbar', add='mean_se', palette = c('blueviolet','chartreuse1','red'), size=1, 
+       point.size = 1.5, ylab='Hc FA')+ 
+  #stat_compare_means(comparisons = my_comparisons)
+  stat_compare_means(comparisons = my_comparisons, method="t.test")+
+  stat_compare_means(label.y = 0.1)
+
+plot_stat_DEG<-ggline(geno_combined_DEG, x = "Genotype", y = "Hc",
+          color = "Genotype", fill = "Genotype", error.plot='errorbar', add='mean_se', palette = c('blueviolet','chartreuse1','red'), size=1, 
+       point.size = 1.5, ylab='Hc DEG')+ 
+  #stat_compare_means(comparisons = my_comparisons)
+  stat_compare_means(comparisons = my_comparisons, method="t.test")+
+  stat_compare_means(label.y = 0.1)
+
+plot_stat_CLUS<-ggline(geno_combined_CLUS, x = "Genotype", y = "Hc",
+          color = "Genotype", fill = "Genotype", error.plot='errorbar', add='mean_se', palette = c('blueviolet','chartreuse1','red'), size=1, 
+       point.size = 1.5, ylab='Hc CLUS')+ 
+ # stat_compare_means(comparisons = my_comparisons)
+  stat_compare_means(comparisons = my_comparisons, method="t.test")+
+  stat_compare_means(label.y = 0.1)
+
+
+plot<-ggarrange(plot_stat_VOL, plot_stat_FA, plot_stat_DEG, plot_stat_CLUS, 
+         # labels = c("Volume", "FA", "DEG", "CLUS" ),
+          ncol = 4, nrow = 1, common.legend = TRUE, legend="bottom")
+
+annotate_figure(plot, top = text_grob("Hc", 
+               color = "black", face = "bold", size = 14))
+
+ggsave(paste(outpath,'Hc_4metrics_stat_compare2.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=16, height=4, unit=c("in"), dpi=200)
+
+
+
+#####with stats_compare
+
 #https://rpubs.com/aaronsc32/regression-confidence-prediction-intervals
 
 #Hc_VOL_Probe_d5.lm <- lm(Probe_d5 ~ Hc, data = cars)
@@ -205,6 +254,14 @@ lm_Hc_VOL_f <- lm(Hc ~ Genotype, combo_f_FA)
 lm_Hc_VOL_m <- lm(Hc ~ Genotype, combo_m_FA)
 #summary(lm_Hc_VOL_f)
 
+#plot significance for group comparisons
+#my_comparisons <- list( c("APOE22", "APOE33"), c("APOE22", "APOE44"), c("APOE33", "APOE44") )
+pHc_Volume<-ggline(geno_combined_VOL, x = "Genotype", y = "Hc",
+          color = "Genotype", fill = "Genotype", error.plot='errorbar', add='mean_se', palette = c('blueviolet','chartreuse1','red'), size=1, 
+       point.size = 1.5, ylab='Volume')+ 
+  stat_compare_means(comparisons = my_comparisons) #+ # Add pairwise comparisons p-value
+#  stat_compare_means(label.y = 0.01)     # Add global p-value
+#xlab='', ylab='Percent SW Distance', legend='top', facet.by='Sex')
 
 #omnibus testing
 #https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
