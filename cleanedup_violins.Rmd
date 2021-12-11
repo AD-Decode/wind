@@ -26,6 +26,7 @@ We read the data and normalize volumes to the whole brain.
 
 knitr::opts_chunk$set(echo=FALSE,warning = FALSE)
 library(tidyverse)
+library(export)
 library(gridExtra)
 library(scales)
 library(ggplot2)
@@ -157,6 +158,8 @@ ggdraw() +
 print('Probe day 5') 
 
 lm_Probe_d5 <- lm(Probe_d5 ~ Genotype*Sex, geno_combined_FA)
+lm_Probe_d8 <- lm(Probe_d8 ~ Genotype*Sex, geno_combined_FA)
+
 summary(lm_Probe_d5)
 lm_Probe_d5_f <- lm(Probe_d5 ~ Genotype, combo_f_FA)
 summary(lm_Probe_d5_f)
@@ -168,10 +171,15 @@ anova(lm_Probe_d5_m)
 
 
 Probe_d5.emm <- emmeans(lm_Probe_d5 , ~ Genotype | Sex, adjust = "sidak")
+Probe_d8.emm <- emmeans(lm_Probe_d8 , ~ Genotype | Sex, adjust = "sidak")
 
-contrast(Probe_d5.emm, simple = c("Genotype", "Sex"))
+#post hoc comparison
+contrast(Probe_d5.emm, simple = c("Genotype", "Sex")) #FDR
 contrast(Probe_d5.emm, simple = list("Genotype", "Sex"))
+print('Probe Day 5 Abs Winding Number')
 emmip(lm_Probe_d5, ~ Genotype | Sex )
+print('Probe Day 8 Abs Winding Number')
+emmip(lm_Probe_d8, ~ Genotype | Sex )
 
 tw.emm <- contrast(Probe_d5.emm, interaction = c(Genotype = "poly", Sex = "consec"),
 by = NULL)
@@ -179,24 +187,39 @@ tw.emm # see the estimates
 coef(tw.emm) # see the contrast coefficients
 
 
-#Tukey below
+#post hoc Tukey below
+
+sink(paste(outpath,'Probe_d5_tukeytable.txt', sep=''))
+summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype*Sex, contr="sidak"))) #consider save to file
+sink()
+sink(paste(outpath, "Winding_ProbeD5_TukeyViolin.txt"))
 emmeans(lm_Probe_d5, ~ Genotype*Sex, contr="tukey")
-pairs(Probe_d5.emm)
+sink()
+sink(paste(outpath, "Winding_ProbeD5_TukeyShortViolin.txt"))
+mypairs<-pairs(Probe_d5.emm) #_consider save to file
+#pairs(Probe_d5.emm)
+pairs(Probe_d5.emm, by="Genotype")
+pairs(Probe_d5.emm, by="Sex")
+sink()
+
+#omnibus testing
+#https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
+sink()
+sink(paste(outpath, "Winding_ProbeD5_omnibus.txt"))
+test(mypairs, joint = TRUE, adjust = "sidak")
+joint_tests(ref_grid(lm_Probe_d5))
+joint_tests(ref_grid(lm_Probe_d5), by = "Sex", adjust = "sidak")
+joint_tests(ref_grid(lm_Probe_d5), by = "Genotype",adjust = "sidak" )
+sink()
+
+res<-summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype*Sex))) #consider save to file
 summary(as.glht(pairs(Probe_d5.emm), by = NULL))
-summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype*Sex)))
 summary(glht(lm_Probe_d5, emm(pairwise ~ Genotype | Sex)))
+
 
 plot(Probe_d5.emm, by = NULL, comparisons = TRUE, adjust = "mvt",
 horizontal = FALSE, colors = "darkgreen", main ="Probe Day 5")
 
-
-#pwpm(warp.emm)
-
-#my.aes <- list(point = list(shape = "square"),
-#segment = list(linetype = "dashed", color = "red"),
-#label = list(family = "serif", fontface = "italic"))
-#my.pal <- c("darkgreen", "blue", "magenta", "orange")
-#pwpp(Probe_d5.emm, aes = my.aes) + #ggplot2::scale_color_manual(values = my.pal)
 
 Probe_d5.rg <- ref_grid(lm_Probe_d5)
 # Do all pairwise comparisons within rows or within columns,
@@ -206,8 +229,6 @@ s.g <- pairs(emmeans(Probe_d5.rg, ~ Sex | Genotype))
 rbind(g.s, s.g, adjust = "mvt")
 update(g.s + g.s, adjust = "fdr") ## same as above except for adjustment
 
-#xtable_emm <- xtable::xtable(Probe_d5.emm, type = "response")
-#print.xtable(xtable_emm)
 
 
 print('Probe day 8') 
@@ -221,6 +242,17 @@ summary(lm_Probe_d8_m)
 anova(lm_Probe_d8)
 anova(lm_Probe_d8_f)
 anova(lm_Probe_d8_m)
+
+#https://rdrr.io/cran/multcomp/man/glht.html
+sink(paste(outpath,'Probe_d8_tukeytable.txt', sep=''))
+summary(glht(lm_Probe_d8, emm(pairwise ~ Genotype*Sex))) #consider save to file
+sink()
+sink(paste(outpath, "Winding_ProbeD8_TukeyViolin.txt"))
+emmeans(lm_Probe_d8, ~ Genotype*Sex, contr="tukey")
+sink()
+sink(paste(outpath, "Winding_ProbeD8_TukeyShortViolin.txt"))
+pairs(Probe_d8.emm) #_consider save to file
+sink()
 
 
 ```
@@ -318,7 +350,7 @@ line_Sex<-ggline(data_VOL,  x='Genotype', y='Brain', color='APOE', fill='APOE', 
        error.plot='errorbar', add='mean_se', palette = c('blueviolet', 'chartreuse1', 'red'), size=1,
        point.size=1.5, xlab='', ylab='Brain Volume (mm3)', legend='top',facet.by = "Sex")    #theme(aspect.ratio=0.5)
   
-grid.draw(cbind(line1, line_Sex, size="last"))
+#grid.draw(cbind(line1, line_Sex, size="last"))
 
 
 
@@ -352,6 +384,27 @@ ggline(data_VOL,  x='Genotype', y='CPu', color='APOE', fill='APOE', #data_VOL
 ggsave(paste(outpath,'CPu_VolumebySex.pdf',sep=''), plot = last_plot(), device='pdf',
        scale=1, width=5, height=5, unit=c("in"), dpi=300)
 
+####
+lm_HcVol <- lm(Hc ~ Genotype*Sex, geno_combined_VOL)
+sink(paste(outpath, "HcVOL_Tukey"))
+emmeans(lm_HcVol, ~ Genotype*Sex, contr="tukey")
+sink()
+
+sink(paste(outpath, "HcVol_singlestep"))
+summary(glht(lm_HcVol, emm(pairwise ~ Genotype*Sex))) #consider save to file
+sink()
+
+
+lm_CPuVol <- lm(CPu ~ Genotype*Sex, geno_combined_VOL)
+sink(paste(outpath, "CPuVOL_Tukey"))
+emmeans(lm_CPuVol, ~ Genotype*Sex, contr="tukey")
+#pairs(Probe_d5.emm)
+sink()
+
+sink(paste(outpath, "CPuVol_singlestep"))
+summary(glht(lm_CPuVol, emm(pairwise ~ Genotype*Sex))) #consider save to file
+sink()
+####
 
 ggline(data_FA,  x='APOE', y='CPu', color='APOE', fill='APOE', #data_VOL
        error.plot='errorbar', add='mean_se', palette = c('blueviolet', 'chartreuse1', 'red'), size=1,

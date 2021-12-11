@@ -12,14 +12,26 @@ outpath='/Users/ar_ni/OneDrive/Desktop/APOE_MWM/R_Graphs/'
 
 masterFile='/Users/alex/AlexBadea_MyPapers/DavidDunson/behaviorAnalysis/APOE22_33_44_young/MWM/apoe22_33_44_mwm_combined.csv'
 outpath='/Users/alex/AlexBadea_MyPapers/DavidDunson/behaviorAnalysis/APOE22_33_44_young/MWM/graphs_stats/'
+outpath<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures_Expanded/'
+
+masterFile='/Users/alex/AlexBadea_MyPapers/DavidDunson/behaviorAnalysis/CombinedAPOE/APOE_MWM_AB.csv'
+#outpath='/Users/alex/AlexBadea_MyPapers/DavidDunson/behaviorAnalysis/CombinedAPOE/Graphs_Stats_Expanded/'
+outpath<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures_Expanded/'
+
 
 info<-read.csv(masterFile, header=TRUE)
 df<-data.frame(info)
 
-df2<-subset(df, (APOE=='APOE2/2')) #Keeps only Genotypes 2/2, 3/3, and 4/4
-df3<-subset(df, (APOE=='APOE3/3'))
-df4<-subset(df, (APOE=='APOE4/4'))
+df2<-subset(df, (APOE=='E22')) #Keeps only Genotypes 2/2, 3/3, and 4/4
+df3<-subset(df, (APOE=='E33'))
+df4<-subset(df, (APOE=='E44'))
+
+# df2<-subset(df, (APOE=='APOE2/2')) #Keeps only Genotypes 2/2, 3/3, and 4/4
+# df3<-subset(df, (APOE=='APOE3/3'))
+# df4<-subset(df, (APOE=='APOE4/4'))
 dfAll<-rbind(df2, df3, df4)
+
+
 
 #Correct for inaccurate distance calibration in AnyMaze
 dfAll$Distance=dfAll$Distance/10
@@ -49,7 +61,7 @@ dfFin$Treatment <- as.factor(dfFin$Treatment)
 dfFin$Code <- as.factor(dfFin$Code)
 
 #Averages 4 trials per day for each mouse
-dfAveraged<-aggregate(.~Animal+APOE+Sex+Stage+Treatment, dfFin, mean, na.action=na.pass)
+dfAveraged<-aggregate(.~Animal+APOE+Sex+Stage, dfFin, mean, na.action=na.pass)
 
 #dfAveraged<-aggregate(dfFin, by = list(dfFin$APOE), FUN = mean, na.action=na.pass)
 

@@ -1,0 +1,367 @@
+---
+title: "Winding_by_fx"
+author: "alexandra badea"
+date: "10/4/2021"
+output: pdf_document
+toc: true
+---
+
+# Aim
+
+We examine whether APOE2, APOE3, and APOE4 carriers use a hippocampal or caudate based spatial navigation strategy. 
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE)
+library(tidyverse)
+library(cowplot)
+library(scales)
+# installing packages 
+library(tidyverse)
+library(cowplot)
+library(gplots)
+library(ggplot2)
+library(patternplot)
+library(lme4)
+library(visreg)
+library(tidyr)
+library(magrittr) 
+library(dplyr)
+library(ggpubr)
+library(lme4)
+library(lsmeans)
+library(emmeans)
+library(multcomp)
+library(zoo)
+library(ggpmisc)
+#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, echo = FALSE, message=FALSE)
+outpath<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
+
+data <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_FA <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_FA.csv")
+
+data_VOL <- read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_VOL.csv")
+
+data_DEG<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_DEG.csv")
+
+data_CLUS<-read.csv("/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/APOE22APOE33APOE44Young_CLUS.csv")
+
+data <- data %>% 
+   filter(Genotype != "HN") 
+
+data_FA <- data_FA %>% 
+   filter(Genotype != "HN") 
+
+data_VOL <- data_VOL %>% 
+   filter(Genotype != "HN") 
+
+data_VOL[,15:347]=data_VOL[,15:347]/data_VOL[,348]
+
+data_DEG <- data_DEG %>% 
+   filter(Genotype != "HN") 
+
+data_CLUS <- data_CLUS %>% 
+   filter(Genotype != "HN") 
+
+
+
+# separating by sex
+geno_combined_FA <- data_FA
+combo_f_FA <- geno_combined_FA %>% 
+  filter(Sex == "female")
+combo_m_FA <- geno_combined_FA %>% 
+  filter(Sex == "male")
+
+geno_combined<-geno_combined_FA #temporary fix
+combo_f<-combo_f_FA
+combo_m<-combo_m_FA
+
+geno_combined_VOL <- data_VOL
+combo_f_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "female")
+combo_m_VOL <- geno_combined_VOL %>% 
+  filter(Sex == "male")
+
+geno_combined_DEG <- data_DEG
+combo_f_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "female")
+combo_m_DEG <- geno_combined_DEG %>% 
+  filter(Sex == "male")
+
+geno_combined_CLUS <- data_CLUS
+combo_f_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "female")
+combo_m_CLUS <- geno_combined_CLUS %>% 
+  filter(Sex == "male")
+
+
+
+
+```
+ 
+
+# Day 5 Probe by fx Vol
+
+
+``` {r fxVOLbbDay5Probe, echo = FALSE}
+
+plotfxVOL <- ggplot(geno_combined_VOL, aes(x = fx, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Sex)) +
+  #ggrepel::geom_text_repel(label=rownames(geno_combined_VOL)) +
+  #geom_text(x=3,y=30,label=lm_eqn(geno_combined_VOL, 'Probe_d5','fx'),color='red',parse=T) 
+  geom_smooth(formula = y ~ x, method = "lm") +
+  stat_poly_eq(formula = y ~ x, 
+               aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+               parse = TRUE,
+               label.x.npc = "right",
+               vstep = 0.05)+ # sets vertical spacing+
+  theme_bw() +
+  labs(title = "Winding Number ~ Volume:fx; males and females",
+       #subtitle = "Both males and females",
+       x = "fx VOL", y = "WN: Probe Day 5") +
+       theme_bw() +
+       theme(legend.position="bottom")
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotfxVOLSex <- ggplot(geno_combined_VOL, aes(fx, Probe_d5, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5",
+       x = "fx VOL", y = "WN: Probe Day 5") +
+  theme(legend.position="bottom")
+
+
+lm <- lm(Probe_d5 ~ fx*Genotype*Sex, geno_combined_VOL)
+#summary(lm)
+lm_f <- lm(Probe_d5 ~ fx*Genotype, combo_f_VOL)
+#summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fx*Genotype, combo_m_VOL)
+#summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+#anova(lm_f)
+#males
+#anova(lm_m)
+
+
+
+
+```
+
+
+
+# Day 5 Probe By fx FA
+
+``` {r fxFAybDay5Probe, echo = FALSE}
+
+plotfxFA <- ggplot(geno_combined_FA, aes(x = fx, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  stat_poly_eq(formula = y ~ x, 
+               aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+               parse = TRUE,
+               label.x.npc = "right",
+               vstep = 0.05)+ # sets vertical spacing+
+  theme_bw() +
+  labs(title = "Winding Number ~ FA: fx, males and females",
+       #subtitle = "Both males and females",
+       x = "fx FA", y = "WN: Probe Day 5") +
+       theme_bw() +
+       theme(legend.position="bottom")
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotfxFASex <- ggplot(geno_combined_FA, aes(fx, Probe_d5, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5",
+       x = "fx FA", y = "WN: Probe Day 5") +
+  theme(legend.position="bottom")
+
+
+
+lm <- lm(Probe_d5 ~ fx*Genotype*Sex, geno_combined_FA)
+#summary(lm)
+lm_f <- lm(Probe_d5 ~ fx*Genotype, combo_f_FA)
+#summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fx*Genotype, combo_m_FA)
+#summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+#anova(lm_f)
+#males
+#anova(lm_m)
+
+
+
+```
+
+
+
+
+
+# Degree of Connectivity
+
+# Day 5 Probe By fx DEG
+
+``` {r fxDEGybDay5Probe, echo = FALSE}
+
+plotfxDEG <- ggplot(geno_combined_DEG, aes(x = fx, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+        scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+        scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+        geom_point(aes(shape = Sex)) +
+        geom_smooth(formula = y ~ x, method = "lm") +
+        stat_poly_eq(formula = y ~ x, 
+               aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+               parse = TRUE,
+               label.x.npc = "right",
+               vstep = 0.05)+ # sets vertical spacing+
+        theme_bw() +
+        labs(title = "Winding Number ~ DEG: fx, males and females",
+       #subtitle = "Both males and females",
+       x = "fx DEG", y = "WN: Probe Day 5") +
+       theme_bw() +
+       theme(legend.position="bottom")
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotfxDEGSex <- ggplot(geno_combined_DEG, aes(fx, Probe_d5, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Winding Number: Probe Day 5",
+       x = "fx DEG", y = "WN: Probe Day 5") +
+  theme(legend.position="bottom")
+
+lm <- lm(Probe_d5 ~ fx*Genotype*Sex, geno_combined_DEG)
+summary(lm)
+lm_f <- lm(Probe_d5 ~ fx*Genotype, combo_f_DEG)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fx*Genotype, combo_m_DEG)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+#anova(lm_f)
+#males
+#anova(lm_m)
+
+
+```
+
+``` {r fxCLUSybDay5Probe, echo = FALSE}
+
+plotfxCLUS <- ggplot(geno_combined_CLUS, aes(x = fx, y = Probe_d5,
+                          color = Genotype,  fill = Genotype)) + 
+  scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Sex)) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  stat_poly_eq(formula = y ~ x, 
+               aes(label = paste(..eq.label.., ..rr.label.., ..p.value.label.., sep = "*`,`~")), 
+               parse = TRUE,
+               label.x.npc = "right",
+               vstep = 0.05)+ # sets vertical spacing+
+  theme_bw() +
+  #stat_cor(label.y = 50) +
+  #stat_regline_equation(label.y = 40)+
+  labs(title = "Winding Number ~ CLUS: fx, males and females",
+       #subtitle = "Both males and females",
+       x = "fx CLUS", y = "WN: Probe Day 5") +
+       theme_bw() +
+       theme(legend.position="bottom")
+       background_grid(major = "xy", minor = "none")
+   
+
+
+plotfxCLUSSex <- ggplot(geno_combined_CLUS, aes(fx, Probe_d5, 
+                                   color = Genotype, fill = Genotype))+                   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
+  scale_fill_manual(values=c('blueviolet', 'chartreuse1', 'red'))+
+  geom_point(aes(shape = Genotype)) + 
+  facet_grid(. ~ Sex) + 
+  stat_smooth(method = "lm") +
+  #stat_cor(aes(color = Genotype), label.x = 3) +  
+  background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
+  panel_border() + 
+  theme_bw() +
+  labs(title = "Clustering Coefficient",
+       x = "fx CLUS", y = "WN: Probe Day 5") +
+  theme(legend.position="bottom")
+  #stat_cor() +
+  #stat_regline_equation()
+
+#ggdraw() + 
+#  draw_plot(plot1, 0, .5, 1, .5) +
+#  draw_plot(plot2, 0, 0, 1, .5) 
+
+
+lm <- lm(Probe_d5 ~ fx*Genotype*Sex, geno_combined_CLUS)
+summary(lm)
+
+my.formula <- y ~ x
+
+
+lm_f <- lm(Probe_d5 ~ fx*Genotype, combo_f_CLUS)
+summary(lm_f)
+lm_m <- lm(Probe_d5 ~ fx*Genotype, combo_m_CLUS)
+summary(lm_m)
+
+#males and females
+anova(lm)
+#females
+#anova(lm_f)
+#males
+#anova(lm_m)
+
+```
+
+
+``` {r fxWindingbyMRIGraphs, echo = FALSE}
+
+ggarrange(plotfxVOL, plotfxVOLSex, plotfxFA, plotfxFASex, 
+          plotfxDEG, plotfxDEGSex, plotfxCLUS, plotfxCLUSSex,
+          #labels = c("A: Day 5", "B: Day 8"),
+          ncol = 2, nrow = 4)
+
+ggsave(paste(outpath,'ProbeD5_Winding_by_fx.pdf',sep=''), plot = last_plot(), device='pdf', scale=1, width=10, height=20, unit=c("in"), dpi=200)
+
+```

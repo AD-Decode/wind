@@ -9,12 +9,14 @@ library(reshape2)
 library(ggpubr)
 
 
+
 dirin<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/dropbox/WindingNumber/TrackingData/Trials/'
 dirout<-'/Users/alex/AlexBadea_MyPapers/DavidDunson/Figures/'
   
 animal<- '190715_8' # APOE2 red
 animal<- '190715_6' # APOE2 red
 animal<- '190715_9' # APOE2 red
+animal<- '190715_8' # APOE2 red
 Genotype2<-'APOE22'
 Genotype<-Genotype2
 
@@ -27,7 +29,8 @@ mytraj_data2['Animal']=rep(animal, length(mytraj_data2$Centre.position.X))
 
 animal<-'190909_9' #APOE3 green
 animal<-'190909_1' #APOE3 green
-animal<-'190715_1' #APOE3 green
+#animal<-'190909_4' #APOE3 green
+#animal<-'190715_1' #APOE3 green
 
 Genotype3<-'APOE33'
 filein3<-paste(dirin,animal,'_Day1_T4_positions.csv',sep='')
@@ -40,6 +43,8 @@ mytraj_data3['Animal']=rep(animal, length(mytraj_data3$Centre.position.X))
 animal<-'191006_6' #APOE4  blue
 animal<-'191006_9' #APOE4  blue
 animal<-'061019_9' #alex to fix ids to match
+animal<-'061019_2' #APOE4  blue loopy
+animal<-'061019_3' #APOE4  blue loopy
 Genotype4<-'APOE44'
 filein4<-paste(dirin,animal,'_Day1_T4_positions.csv',sep='')
 mytraj_data4 <- read.csv(filein4)
@@ -48,21 +53,6 @@ mytraj_data4['Genotype']=rep(Genotype4, length(mytraj_data4$Centre.position.X))
 mytraj_data4['Animal']=rep(animal, length(mytraj_data4$Centre.position.X))
 
 mytraj_data<-rbind(mytraj_data2, mytraj_data3,mytraj_data4)
-
-group.colors <- c(A = "#333BFF", B = "#CC6600", C ="#9633FF")
-#ggplot(data=mytraj_data, aes(x=Centre.position.X, y=Centre.position.Y, group = Genotype, color=Genotype)) +
-# ggplot(data=mytraj_data, aes(x=Centre.position.X, y=Centre.position.Y, group = Genotype, color=Genotype))+
-#   scale_fill_manual((values=group.colors))+ #['blueviolet','chartreuse1','red'])+
-#   scale_fill_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))+
-#   #geom_point()+
-#   #geom_smooth(method=lm, se=FALSE, fullrange=TRUE, aes(fill=Genotype))+
-#   geom_path (linetype=1, size=0.5)+
-#   theme_classic()+
-#   facet_grid(. ~ Genotype) + 
-#   #stat_smooth(method = "lm") +
-#   #background_grid(major = 'xy', minor = "none") + # add thin horizontal lines 
-#   theme_bw() +
-#   ggtitle(paste('Day 1  Trial 4'))
 
 ggplot(data=mytraj_data, aes(x=Centre.position.X, y=Centre.position.Y, group = Genotype, color=Genotype)) +  
   #geom_point()+
@@ -77,7 +67,7 @@ ggplot(data=mytraj_data, aes(x=Centre.position.X, y=Centre.position.Y, group = G
   theme_bw() +
   ggtitle(paste('Day 1  Trial 4'))
 
-ggsave(paste(dirout,'my3animals', 'D1Trial4.pdf',sep=''), plot = last_plot(), device='pdf',
+ggsave(paste(dirout,'my3animals', 'D1Trial4b.pdf',sep=''), plot = last_plot(), device='pdf',
        scale=1, width=5, height=5, unit=c("in"), dpi=300)
 
 
@@ -120,5 +110,5 @@ ggsave(paste(dirout,'my3animals', 'D1Trial4.pdf',sep=''), plot = last_plot(), de
 #ggdraw() + 
 #  draw_plot(plot1, 0, .5, 1, .5)
 
-ggsave(paste(dirout,'Example1', 'D1Trial4.pdf',sep=''), plot = last_plot(), device='pdf',
+ggsave(paste(dirout,'Example2', 'D1Trial4.pdf',sep=''), plot = last_plot(), device='pdf',
        scale=1, width=5, height=5, unit=c("in"), dpi=300)
