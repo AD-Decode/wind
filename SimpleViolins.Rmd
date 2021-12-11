@@ -159,16 +159,6 @@ lm_Probe_d5_f <- lm(Probe_d5 ~ Genotype, combo_f_FA)
 lm_Probe_d5_m <- lm(Probe_d5 ~ Genotype, combo_m_FA)
 #summary(lm_Probe_d5_m)
 
-
-#33333
-sink(paste(outpath, "WindingProbeDay5Models.txt"))
-mydata.lm <- lm(Probe_d5 ~ Genotype*Sex, data = geno_combined_FA)
-anova(mydata.lm)
-summary(glht(mydata.lm, emm(pairwise ~ Genotype|Sex, adjust="sidak"))) #consider save to file
-summary(glht(mydata.lm, emm(pairwise ~ Sex| Genotype)))
-sink()
-#3333
-
 #omnibus testing
 #https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html#adjust
 

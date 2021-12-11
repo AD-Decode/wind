@@ -142,7 +142,23 @@ dfProbe$SE.Dist.Norm<-dfProbe$SE.distance/dfProbe$DistTot
 dfProbe$SW.Dist.Norm<-dfProbe$SW.distance/dfProbe$DistTot
 
 
+####
 
+#33333
+sink(paste(outpath, "WindingProbeTrialsModels.txt"))
+mydata.lm <- lm(Winding ~ Stage*APOE*Sex, data = dfAveraged)
+summary(mydata.lm)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ APOE+Sex|Stage, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ APOE+Stage| Sex)))
+summary(glht(mydata.lm, emm(pairwise ~ Stage+Sex| APOE)))
+#summary(glht(mydata.lm, emm(pairwise ~ APOE| Sex*Stage)))
+summary(glht(mydata.lm, emm(pairwise ~ APOE| Sex)))
+summary(glht(mydata.lm, emm(pairwise ~ Sex| APOE)))
+sink()
+#3333
+
+####
 
 
 
@@ -174,6 +190,7 @@ lm_DistanceNSW_d5 <- lm(DistNorm ~ Genotype*Sex, dfSWp1)
 sink(paste(outpath, "NormSWDist_D5_Tukey.txt"))
 emmeans(lm_DistanceNSW_d5 , ~ Genotype*Sex, contr="tukey")
 sink()
+
 
 lm_WindingD5 <- lm(Winding ~ Genotype*Sex, dfSWp1)
 sink(paste(outpath, "Winding_D5_Tukey.txt"))
@@ -414,6 +431,21 @@ postHocTable[5,]=c('E44-E33', tukey.test$APOE[3,1], tukey.test$APOE[3,2], tukey.
 myfile<-paste(outpath,'poolDistAPOEstats.csv')
 write.table(mytTable, file=myfile, col.names = mycolnames , sep = "," , row.names = F,append=TRUE)
 write.table(postHocTable, file=myfile, sep=",", row.names=F, append=TRUE, col.names=F)
+
+#33333
+sink(paste(outpath, "DistancebyDaymodels.txt"))
+mydata.lm <- lm(Distance ~ Stage*APOE*Sex, data = dfAveraged)
+summary(mydata.lm)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ APOE+Sex|Stage, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ APOE+Stage| Sex)))
+summary(glht(mydata.lm, emm(pairwise ~ Stage+Sex| APOE)))
+#summary(glht(mydata.lm, emm(pairwise ~ APOE| Sex*Stage)))
+summary(glht(mydata.lm, emm(pairwise ~ APOE| Sex)))
+summary(glht(mydata.lm, emm(pairwise ~ Sex| APOE)))
+sink()
+#3333
+
 #__________________________________________________________________
 
 #4. Distance to Platform over acquisition day for APOE 2/2, 3/3, 4/4, separated by sex
@@ -480,6 +512,20 @@ ggsave(paste(outpath,'NormSWDistAPOE.pdf',sep=''), plot = last_plot(), device = 
 data.lm <- lm(NormSWDist ~ APOE, data = dfAveraged)
 data.aov <- aov(data.lm)
 tukey.test <- TukeyHSD(data.aov)
+
+#33333
+sink(paste(outpath, "NSWDistancebyDayModels.txt"))
+mydata.lm <- lm(NormSWDist ~ Stage*APOE*Sex, data = dfAveraged)
+summary(mydata.lm)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ APOE+Sex|Stage, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ APOE+Stage| Sex)))
+summary(glht(mydata.lm, emm(pairwise ~ Stage+Sex| APOE)))
+#summary(glht(mydata.lm, emm(pairwise ~ APOE| Sex*Stage)))
+summary(glht(mydata.lm, emm(pairwise ~ APOE| Sex)))
+summary(glht(mydata.lm, emm(pairwise ~ Sex| APOE)))
+sink()
+#3333
 
 testMethod<-oneway.test(NormSWDist ~ APOE, data = dfAveraged)
 
@@ -1669,6 +1715,17 @@ data.lm <- lm(NormSWDist ~ APOE, data = dfp1)
 data.aov <- aov(data.lm)
 tukey.test <- TukeyHSD(data.aov)
 
+#33333
+sink(paste(outpath, "PercentSWDistanceDay5Models.txt"))
+mydata.lm <- lm(NormSWDist ~ APOE*Sex, data = dfp1)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ APOE|Sex, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ Sex| APOE)))
+sink()
+#3333
+
+
+
 testMethod<-oneway.test(NormSWDist ~ APOE, data = dfp1)
 
 mytTable<-as_tibble(
@@ -1751,6 +1808,16 @@ ggsave(paste(outpath,'NormSWDistAPOEProbe2.pdf',sep=''), plot = last_plot(), dev
 data.lm <- lm(NormSWDist ~ APOE, data = dfp2)
 data.aov <- aov(data.lm)
 tukey.test <- TukeyHSD(data.aov)
+
+#33333
+sink(paste(outpath, "PercentSWDistanceDay8Models.txt"))
+mydata.lm <- lm(NormSWDist ~ APOE*Sex, data = dfp2)
+anova(mydata.lm)
+summary(glht(mydata.lm, emm(pairwise ~ APOE|Sex, adjust="sidak"))) #consider save to file
+summary(glht(mydata.lm, emm(pairwise ~ Sex| APOE)))
+sink()
+#3333
+
 
 testMethod<-oneway.test(NormSWDist ~ APOE, data = dfp2)
 
