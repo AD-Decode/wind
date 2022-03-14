@@ -111,6 +111,30 @@ combo_m_CLUS <- geno_combined_CLUS %>%
 
 ``` {r HcVOLbbDayd8Probe, echo=FALSE}
 
+#plotHcVOL <- ggplot(geno_combined_VOL, aes(x = Hc, y = Probe_d8) + 
+#  geom_smooth(formula = y ~ x, method = "lm")
+
+  ggplot(geno_combined_VOL, aes(Hc, Probe_d8)) + 
+  geom_point() + 
+  stat_smooth(method = "lm", 
+              formula = y ~ x )+
+    stat_summary(fun.y=median, geom="point", size=2, color="black")
+  
+  fit1 <- lm(Probe_d8 ~ Hc, data = geno_combined_VOL)   
+ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$model)[1])) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") +
+  #geom_label(aes(x = 0, y = 25), hjust = 0, 
+  #           label = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
+  #                                             "\nIntercept =",signif(fit1$coef[[1]],5 ),
+  #                                             " \nSlope =",signif(fit1$coef[[2]], 5),
+   #                                            " \nP =",signif(summary(fit1)$coef[2,4], 5)))
+
+  labs(title = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
+                     "Intercept =",signif(fit1$coef[[1]],5 ),
+                     " Slope =",signif(fit1$coef[[2]], 5),
+                     " P =",signif(summary(fit1)$coef[2,4], 5)))
+
 plotHcVOL <- ggplot(geno_combined_VOL, aes(x = Hc, y = Probe_d8,
                           color = Genotype,  fill = Genotype)) + 
   scale_color_manual(values=c('blueviolet', 'chartreuse1', 'red')) + 
